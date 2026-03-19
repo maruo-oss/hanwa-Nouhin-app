@@ -74,9 +74,9 @@
     .btn-secondary:hover { background: #f5f5f5; }
 
     /* 明細テーブル */
-    .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .detail-table th { background: #f5f5f5; padding: 7px 8px; border: 1px solid #e0e0e0; font-weight: 500; text-align: left; white-space: nowrap; font-size: 12px; color: #555; }
-    .detail-table td { padding: 5px 8px; border: 1px solid #e0e0e0; }
+    .detail-table { border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    .detail-table th { background: #f5f5f5; padding: 7px 8px; border: 1px solid #e0e0e0; font-weight: 500; text-align: left; white-space: nowrap; font-size: 12px; color: #555; position: relative; overflow: hidden; }
+    .detail-table td { padding: 5px 8px; border: 1px solid #e0e0e0; overflow: hidden; }
     .detail-table td input { width: 100%; border: none; background: transparent; font-size: 13px; padding: 2px 0; outline: none; }
     .detail-table td input:focus { background: #f5f8ff; }
     .detail-table td input.changed { background: #fffde7; }
@@ -85,6 +85,8 @@
     .del-cell { width: 28px; text-align: center; padding: 0 !important; }
     .row-del-btn { background: none; border: none; color: #c62828; font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1; }
     .row-del-btn:hover { background: #ffebee; }
+    .col-resizer { position: absolute; top: 0; right: 0; width: 5px; height: 100%; cursor: col-resize; background: transparent; z-index: 1; }
+    .col-resizer:hover, .col-resizer.active { background: #1565c0; }
 
     /* 右ペイン */
     .right-pane { width: 35%; min-width: 250px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
@@ -330,12 +332,12 @@ function clearEditor() {
 function renderHeaderEditor(d) {
   var ro = editMode ? '' : 'readonly';
   var fields = [
-    { key: '日時', label: '日時' },
+    { key: '日時', label: '日時', type: 'date' },
     { key: '納品書No', label: '納品書No' },
     { key: '取引先', label: '取引先' },
     { key: '作業所', label: '作業所' },
     { key: '貸出期間', label: '貸出期間' },
-    { key: '請求計上日', label: '請求計上日' },
+    { key: '請求計上日', label: '請求計上日', type: 'date' },
     { key: '伝票摘要', label: '伝票摘要' },
     { key: 'status', label: 'ステータス' }
   ];
@@ -355,9 +357,10 @@ function renderHeaderEditor(d) {
   fields.forEach(function(f) {
     var val = d[f.key] || '';
     var rowKey = d.items && d.items[0] ? d.items[0].row_key : '';
+    var inputType = (editMode && f.type === 'date') ? 'date' : 'text';
     html += '<div class="form-group">' +
       '<label>' + f.label + '</label>' +
-      '<input type="text" value="' + escapeAttr(val) + '" ' + ro +
+      '<input type="' + inputType + '" value="' + escapeAttr(val) + '" ' + ro +
       ' data-field="' + f.key + '" data-rowkey="' + rowKey + '"' +
       ' onchange="markChanged(this)">' +
       '</div>';
@@ -375,12 +378,15 @@ function renderDetailEditor(d) {
     return;
   }
 
+  var colWidths = { '': 28, '区分': 60, '機種': 100, '号機': 60, '型式': 140, '管理No': 70, '数量': 55, '単位': 45, '単価': 75, '金額': 80, '基本管理料': 80, '備考': 120 };
   var html = '<div class="section-title">明細データ (' + items.length + '件)</div>';
-  html += '<table class="detail-table"><thead><tr>' +
-    '<th></th>' +
-    '<th>区分</th><th>機種</th><th>号機</th><th>型式</th><th>管理No</th>' +
-    '<th>数量</th><th>単位</th><th>単価</th><th>金額</th><th>基本管理料</th><th>備考</th>' +
-    '</tr></thead><tbody>';
+  html += '<table class="detail-table" id="detailTable"><thead><tr>';
+  var cols = ['', '区分', '機種', '号機', '型式', '管理No', '数量', '単位', '単価', '金額', '基本管理料', '備考'];
+  cols.forEach(function(c, i) {
+    var w = colWidths[c] || 80;
+    html += '<th style="width:' + w + 'px;">' + c + (i > 0 ? '<div class="col-resizer" data-col="' + i + '"></div>' : '') + '</th>';
+  });
+  html += '</tr></thead><tbody>';
 
   items.forEach(function(item) {
     html += '<tr>';
@@ -396,6 +402,7 @@ function renderDetailEditor(d) {
 
   html += '</tbody></table>';
   document.getElementById('detailEditor').innerHTML = html;
+  initColumnResizers();
 }
 
 // ============================================================
@@ -667,6 +674,40 @@ function initHorizontalResizer(resizerId, topId) {
 }
 
 initResizers();
+
+// ============================================================
+// 明細テーブル列リサイザー
+// ============================================================
+function initColumnResizers() {
+  var table = document.getElementById('detailTable');
+  if (!table) return;
+  var resizers = table.querySelectorAll('.col-resizer');
+  resizers.forEach(function(resizer) {
+    resizer.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var th = resizer.parentElement;
+      var startX = e.clientX;
+      var startW = th.offsetWidth;
+      resizer.classList.add('active');
+
+      function onMove(ev) {
+        var newW = startW + (ev.clientX - startX);
+        if (newW < 30) newW = 30;
+        th.style.width = newW + 'px';
+      }
+
+      function onUp() {
+        resizer.classList.remove('active');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  });
+}
 
 // ============================================================
 // ユーティリティ

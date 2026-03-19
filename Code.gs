@@ -197,8 +197,9 @@ function normalizeGeminiResponse(data, fileId, fileName) {
   const items = data.items || [];
   const now = formatDate(new Date());
 
-  // 取引先はファイル名の先頭（_ or ‗ の手前）から抽出
+  // ファイル名から取引先・機種を抽出
   const clientName = extractClientFromFileName(fileName);
+  const machineName = extractMachineFromFileName(fileName);
 
   const headerPart = [
     h['日時'] || '', h['納品書No'] || '',
@@ -220,7 +221,7 @@ function normalizeGeminiResponse(data, fileId, fileName) {
       rows.push([
         rowKey, fileId, fileName, '完了',
         ...headerPart,
-        item['区分'] || '', item['機種'] || '',
+        item['区分'] || '', machineName,
         '', // 号機（手動入力用、Geminiでは空）
         item['型式'] || '', item['管理No'] || '',
         safeParseNumber(item['数量']),
@@ -433,6 +434,18 @@ function extractClientFromFileName(fileName) {
   // _ (半角), ＿ (全角), ‗ (U+2017) で分割し先頭を取得
   const parts = name.split(/[_＿‗]/);
   return parts[0] || '';
+}
+
+function extractMachineFromFileName(fileName) {
+  // 拡張子を除去
+  const name = fileName.replace(/\.pdf$/i, '');
+  // _ (半角), ＿ (全角), ‗ (U+2017) で分割
+  const parts = name.split(/[_＿‗]/);
+  // 右から見て最初の_と次の_の間 = 後ろから2番目の要素
+  if (parts.length >= 3) {
+    return parts[parts.length - 2] || '';
+  }
+  return '';
 }
 
 function safeParseNumber(val) {
