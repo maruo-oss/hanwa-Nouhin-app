@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif; background: #f4f6f8; color: #333; min-height: 100vh; }
+
+    /* ナビバー */
+    .navbar { background: #1565c0; color: #fff; display: flex; align-items: center; padding: 0 16px; height: 48px; gap: 12px; }
+    .navbar .title { font-size: 16px; font-weight: 600; margin-right: 24px; }
+    .nav-link { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 4px; transition: background 0.15s; }
+    .nav-link:hover { background: rgba(255,255,255,0.15); }
+    .nav-link.active { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* フィルタバー */
+    .filter-bar { background: #fff; padding: 12px 20px; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .filter-bar label { font-size: 13px; color: #555; font-weight: 500; }
+    .filter-bar input[type="date"] { padding: 5px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+    .filter-bar .apply-btn { background: #1565c0; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    .filter-bar .apply-btn:hover { background: #0d47a1; }
+    .filter-bar .reset-btn { background: #fff; color: #555; border: 1px solid #ccc; padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+
+    /* ダッシュボードグリッド */
+    .dashboard { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+    .card-header { padding: 12px 16px; font-size: 14px; font-weight: 600; color: #1565c0; border-bottom: 1px solid #f0f0f0; }
+    .card-body { padding: 16px; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+    .card.full-width { grid-column: 1 / -1; }
+
+    /* サマリーテーブル */
+    .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .summary-table th { background: #f5f5f5; padding: 8px 10px; border: 1px solid #e0e0e0; text-align: left; font-weight: 500; color: #555; }
+    .summary-table td { padding: 8px 10px; border: 1px solid #e0e0e0; }
+    .summary-table tr:hover { background: #fafafa; }
+    .summary-table .total-row { font-weight: 600; background: #e3f2fd; }
+    .summary-table .amount { text-align: right; }
+
+    /* ローディング */
+    .loading { text-align: center; padding: 40px; color: #aaa; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #e0e0e0; border-top-color: #1565c0; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .no-data { color: #aaa; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- ナビバー -->
+<nav class="navbar">
+  <span class="title">納品書管理</span>
+  <a class="nav-link" id="indexLink" href="#" target="_top">データ管理</a>
+  <a class="nav-link active" href="#" onclick="return false;">ダッシュボード</a>
+</nav>
+
+<!-- フィルタ -->
+<div class="filter-bar">
+  <label>期間:</label>
+  <input type="date" id="startDate">
+  <span>〜</span>
+  <input type="date" id="endDate">
+  <button class="apply-btn" onclick="applyFilter()">適用</button>
+  <button class="reset-btn" onclick="resetFilter()">リセット</button>
+</div>
+
+<!-- ダッシュボード -->
+<div class="dashboard">
+  <div class="card">
+    <div class="card-header">月別金額推移</div>
+    <div class="card-body" id="monthlyChart">
+      <div class="loading"><div class="spinner"></div>読み込み中...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">取引先別集計</div>
+    <div class="card-body" id="clientChart">
+      <div class="loading"><div class="spinner"></div>読み込み中...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">機種別集計</div>
+    <div class="card-body" id="machineChart">
+      <div class="loading"><div class="spinner"></div>読み込み中...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">明細サマリー</div>
+    <div class="card-body" id="summaryTable" style="align-items: flex-start;">
+      <div class="loading"><div class="spinner"></div>読み込み中...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// データ管理リンク設定
+google.script.run.withSuccessHandler(function(url) {
+  document.getElementById('indexLink').href = url;
+}).getWebAppUrl();
+
+// Google Charts 読み込み
+google.charts.load('current', { packages: ['corechart', 'bar'] });
+google.charts.setOnLoadCallback(function() {
+  fetchData();
+});
+
+var dashData = null;
+
+function fetchData() {
+  var start = document.getElementById('startDate').value || null;
+  var end = document.getElementById('endDate').value || null;
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      dashData = data;
+      drawAllCharts();
+    })
+    .withFailureHandler(function(err) {
+      document.querySelectorAll('.card-body').forEach(function(el) {
+        el.innerHTML = '<div class="no-data">データ取得エラー</div>';
+      });
+    })
+    .getDashboardData(start, end);
+}
+
+function applyFilter() { fetchData(); }
+
+function resetFilter() {
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
+  fetchData();
+}
+
+function drawAllCharts() {
+  if (!dashData) return;
+  drawMonthlyChart();
+  drawClientChart();
+  drawMachineChart();
+  drawSummaryTable();
+}
+
+// 月別金額推移（ColumnChart）
+function drawMonthlyChart() {
+  var container = document.getElementById('monthlyChart');
+  if (!dashData.monthly || dashData.monthly.length === 0) {
+    container.innerHTML = '<div class="no-data">データなし</div>';
+    return;
+  }
+
+  var dataTable = new google.visualization.DataTable();
+  dataTable.addColumn('string', '月');
+  dataTable.addColumn('number', '金額');
+
+  dashData.monthly.forEach(function(d) {
+    dataTable.addRow([d.month, d.amount]);
+  });
+
+  var chart = new google.visualization.ColumnChart(container);
+  chart.draw(dataTable, {
+    legend: { position: 'none' },
+    colors: ['#1565c0'],
+    chartArea: { width: '85%', height: '75%' },
+    vAxis: { format: '#,##0', title: '金額（円）' },
+    hAxis: { slantedText: true },
+    animation: { startup: true, duration: 500 }
+  });
+}
+
+// 取引先別集計（PieChart）
+function drawClientChart() {
+  var container = document.getElementById('clientChart');
+  if (!dashData.clients || dashData.clients.length === 0) {
+    container.innerHTML = '<div class="no-data">データなし</div>';
+    return;
+  }
+
+  var dataTable = new google.visualization.DataTable();
+  dataTable.addColumn('string', '取引先');
+  dataTable.addColumn('number', '金額');
+
+  dashData.clients.forEach(function(d) {
+    dataTable.addRow([d.name, d.amount]);
+  });
+
+  var chart = new google.visualization.PieChart(container);
+  chart.draw(dataTable, {
+    chartArea: { width: '90%', height: '80%' },
+    legend: { position: 'right', textStyle: { fontSize: 12 } },
+    colors: ['#1565c0', '#1e88e5', '#42a5f5', '#64b5f6', '#90caf9', '#bbdefb', '#0d47a1', '#0277bd'],
+    pieSliceTextStyle: { fontSize: 11 }
+  });
+}
+
+// 機種別集計（BarChart）
+function drawMachineChart() {
+  var container = document.getElementById('machineChart');
+  if (!dashData.machines || dashData.machines.length === 0) {
+    container.innerHTML = '<div class="no-data">データなし</div>';
+    return;
+  }
+
+  var dataTable = new google.visualization.DataTable();
+  dataTable.addColumn('string', '機種');
+  dataTable.addColumn('number', '金額');
+
+  dashData.machines.forEach(function(d) {
+    dataTable.addRow([d.name, d.amount]);
+  });
+
+  var chart = new google.visualization.BarChart(container);
+  chart.draw(dataTable, {
+    legend: { position: 'none' },
+    colors: ['#1565c0'],
+    chartArea: { width: '65%', height: '80%' },
+    hAxis: { format: '#,##0' },
+    animation: { startup: true, duration: 500 }
+  });
+}
+
+// 明細サマリーテーブル
+function drawSummaryTable() {
+  var container = document.getElementById('summaryTable');
+  if (!dashData.clients || dashData.clients.length === 0) {
+    container.innerHTML = '<div class="no-data">データなし</div>';
+    return;
+  }
+
+  var total = 0;
+  var rows = dashData.clients.map(function(d) {
+    total += d.amount;
+    return '<tr><td>' + escapeHtml(d.name) + '</td><td class="amount">' + formatNumber(d.amount) + '</td></tr>';
+  });
+
+  container.innerHTML =
+    '<table class="summary-table" style="width:100%;">' +
+    '<thead><tr><th>取引先</th><th class="amount">金額（円）</th></tr></thead>' +
+    '<tbody>' + rows.join('') +
+    '<tr class="total-row"><td>合計</td><td class="amount">' + formatNumber(total) + '</td></tr>' +
+    '</tbody></table>';
+}
+
+// リサイズ時に再描画
+window.addEventListener('resize', function() {
+  if (dashData) drawAllCharts();
+});
+
+function formatNumber(n) {
+  return Number(n).toLocaleString('ja-JP');
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>

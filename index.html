@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif; background: #f4f6f8; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ナビバー */
+    .navbar { background: #1565c0; color: #fff; display: flex; align-items: center; padding: 0 16px; height: 48px; gap: 12px; flex-shrink: 0; }
+    .navbar .title { font-size: 16px; font-weight: 600; margin-right: 24px; }
+    .nav-link { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 4px; transition: background 0.15s; }
+    .nav-link:hover { background: rgba(255,255,255,0.15); }
+    .nav-link.active { background: rgba(255,255,255,0.2); color: #fff; }
+    .nav-spacer { flex: 1; }
+    .nav-btn { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; transition: background 0.15s; }
+    .nav-btn:hover { background: rgba(255,255,255,0.25); }
+    .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* メインコンテナ */
+    .main { flex: 1; display: flex; overflow: hidden; }
+
+    /* 左ペイン */
+    .left-pane { width: 300px; min-width: 200px; background: #fff; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; flex-shrink: 0; }
+    .left-header { padding: 12px; border-bottom: 1px solid #e0e0e0; }
+    .search-box { width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; outline: none; }
+    .search-box:focus { border-color: #1565c0; }
+    .date-filter-row { display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+    .date-filter-row input[type="date"] { flex: 1; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+    .date-sep { font-size: 12px; color: #888; }
+    .filter-row { display: flex; gap: 4px; margin-top: 8px; }
+    .filter-btn { flex: 1; padding: 5px; border: 1px solid #ddd; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer; text-align: center; }
+    .filter-btn.active { background: #1565c0; color: #fff; border-color: #1565c0; }
+    .file-list { flex: 1; overflow-y: auto; }
+    .file-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.1s; }
+    .file-item:hover { background: #f5f8ff; }
+    .file-item.selected { background: #e3f2fd; border-left: 3px solid #1565c0; }
+    .file-item .fname { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-item .fmeta { font-size: 11px; color: #888; margin-top: 3px; }
+    .file-item .fstatus { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+    .fstatus.completed { background: #e8f5e9; color: #2e7d32; }
+    .fstatus.pending { background: #fff3e0; color: #e65100; }
+
+    /* リサイザー */
+    .resizer-v { width: 5px; background: #e0e0e0; cursor: col-resize; flex-shrink: 0; transition: background 0.15s; }
+    .resizer-v:hover, .resizer-v.active { background: #1565c0; }
+    .resizer-h { height: 5px; background: #e0e0e0; cursor: row-resize; flex-shrink: 0; transition: background 0.15s; }
+    .resizer-h:hover, .resizer-h.active { background: #1565c0; }
+
+    /* 中央ペイン */
+    .center-pane { flex: 1; display: flex; flex-direction: column; min-width: 300px; overflow: hidden; }
+    .center-top { height: 45%; min-height: 120px; overflow-y: auto; padding: 16px; background: #fff; }
+    .center-bottom { flex: 1; overflow: auto; padding: 16px; background: #fafafa; }
+
+    /* ヘッダー情報グリッド */
+    .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .header-grid.full { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 11px; color: #888; margin-bottom: 3px; font-weight: 500; }
+    .form-group input, .form-group select { padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; background: #f9f9f9; }
+    .form-group input:focus { border-color: #1565c0; outline: none; background: #fff; }
+    .form-group input[readonly] { background: #f0f0f0; color: #666; }
+    .form-group input.changed { background: #fffde7; border-color: #f9a825; }
+
+    .section-title { font-size: 14px; font-weight: 600; color: #1565c0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .edit-actions { display: flex; gap: 8px; margin-left: auto; }
+    .btn { padding: 5px 14px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid; transition: all 0.15s; }
+    .btn-primary { background: #1565c0; color: #fff; border-color: #1565c0; }
+    .btn-primary:hover { background: #0d47a1; }
+    .btn-danger { background: #fff; color: #c62828; border-color: #c62828; }
+    .btn-danger:hover { background: #ffebee; }
+    .btn-secondary { background: #fff; color: #555; border-color: #ccc; }
+    .btn-secondary:hover { background: #f5f5f5; }
+
+    /* 明細テーブル */
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .detail-table th { background: #f5f5f5; padding: 7px 8px; border: 1px solid #e0e0e0; font-weight: 500; text-align: left; white-space: nowrap; font-size: 12px; color: #555; }
+    .detail-table td { padding: 5px 8px; border: 1px solid #e0e0e0; }
+    .detail-table td input { width: 100%; border: none; background: transparent; font-size: 13px; padding: 2px 0; outline: none; }
+    .detail-table td input:focus { background: #f5f8ff; }
+    .detail-table td input.changed { background: #fffde7; }
+    .detail-table td input[readonly] { color: #333; }
+    .detail-table tr:hover { background: #fafafa; }
+    .del-cell { width: 28px; text-align: center; padding: 0 !important; }
+    .row-del-btn { background: none; border: none; color: #c62828; font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+    .row-del-btn:hover { background: #ffebee; }
+
+    /* 右ペイン */
+    .right-pane { width: 35%; min-width: 250px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+    .preview-header { padding: 6px 12px; font-size: 12px; color: #888; border-bottom: 1px solid #e0e0e0; background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
+    .preview-controls { display: flex; gap: 4px; align-items: center; }
+    .preview-btn { background: #fff; border: 1px solid #ccc; border-radius: 4px; width: 28px; height: 28px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555; transition: all 0.15s; padding: 0; }
+    .preview-btn:hover { background: #e3f2fd; border-color: #1565c0; color: #1565c0; }
+    .preview-zoom-label { font-size: 11px; color: #555; min-width: 36px; text-align: center; }
+    .preview-container { flex: 1; overflow: hidden; position: relative; }
+    .preview-container iframe { border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+    .no-preview { flex: 1; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 14px; }
+
+    /* ローディング */
+    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .loading-box { background: #fff; padding: 28px 36px; border-radius: 8px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+    .spinner { width: 36px; height: 36px; border: 3px solid #e0e0e0; border-top-color: #1565c0; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: #555; }
+
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #aaa; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* 隠しinput */
+    #pdfInput { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ナビバー -->
+<nav class="navbar">
+  <span class="title">納品書管理</span>
+  <a class="nav-link active" href="#" onclick="return false;">データ管理</a>
+  <a class="nav-link" id="dashLink" href="#" target="_top">ダッシュボード</a>
+  <span class="nav-spacer"></span>
+  <button class="nav-btn" id="btnUpload" onclick="document.getElementById('pdfInput').click()">PDF取込</button>
+  <button class="nav-btn" id="btnExport" onclick="exportExcel()">Excel出力</button>
+  <input type="file" id="pdfInput" accept=".pdf" onchange="handleFileUpload(this)">
+</nav>
+
+<!-- メイン3ペインレイアウト -->
+<div class="main">
+  <!-- 左ペイン -->
+  <div class="left-pane" id="leftPane">
+    <div class="left-header">
+      <input type="text" class="search-box" id="searchBox" placeholder="検索..." oninput="filterFiles()">
+      <div class="date-filter-row">
+        <input type="date" id="dateFrom" onchange="filterFiles()">
+        <span class="date-sep">〜</span>
+        <input type="date" id="dateTo" onchange="filterFiles()">
+      </div>
+      <select class="search-box" id="clientFilter" onchange="filterFiles()" style="margin-top:8px;">
+        <option value="">取引先：全て</option>
+      </select>
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">全て</button>
+        <button class="filter-btn" data-filter="完了" onclick="setFilter('完了', this)">完了</button>
+        <button class="filter-btn" data-filter="未処理" onclick="setFilter('未処理', this)">未処理</button>
+      </div>
+    </div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+
+  <!-- 左リサイザー -->
+  <div class="resizer-v" id="resizerLeft"></div>
+
+  <!-- 中央ペイン -->
+  <div class="center-pane" id="centerPane">
+    <div class="center-top" id="centerTop">
+      <div id="headerEditor">
+        <div class="empty-state">
+          <div class="icon">📄</div>
+          <div>納品書を選択してください</div>
+        </div>
+      </div>
+    </div>
+    <!-- 上下リサイザー -->
+    <div class="resizer-h" id="resizerMid"></div>
+    <div class="center-bottom" id="centerBottom">
+      <div id="detailEditor"></div>
+    </div>
+  </div>
+
+  <!-- 右リサイザー -->
+  <div class="resizer-v" id="resizerRight"></div>
+
+  <!-- 右ペイン -->
+  <div class="right-pane" id="rightPane">
+    <div class="preview-header">
+      <span>PDFプレビュー</span>
+      <div class="preview-controls" id="previewControls" style="display:none;">
+        <button class="preview-btn" onclick="pvPan(80, 0)" title="左へ">&#8592;</button>
+        <button class="preview-btn" onclick="pvPan(0, 60)" title="上へ">&#8593;</button>
+        <button class="preview-btn" onclick="pvPan(0, -60)" title="下へ">&#8595;</button>
+        <button class="preview-btn" onclick="pvPan(-80, 0)" title="右へ">&#8594;</button>
+        <button class="preview-btn" onclick="pvZoom(-0.2)" title="縮小">&#8722;</button>
+        <span class="preview-zoom-label" id="zoomLabel">100%</span>
+        <button class="preview-btn" onclick="pvZoom(0.2)" title="拡大">&#43;</button>
+        <button class="preview-btn" onclick="pvReset()" title="リセット" style="font-size:12px;">&#8634;</button>
+      </div>
+    </div>
+    <div class="no-preview" id="noPreview">プレビューなし</div>
+    <div class="preview-container" id="previewContainer" style="display:none;">
+      <iframe id="pdfFrame"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ローディング -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">処理中...</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 状態管理
+// ============================================================
+var allData = [];
+var selectedFileId = null;
+var currentFilter = 'all';
+var editMode = false;
+var pendingChanges = [];
+
+// ダッシュボードリンク設定
+google.script.run.withSuccessHandler(function(url) {
+  document.getElementById('dashLink').href = url + '?page=dashboard';
+}).getWebAppUrl();
+
+// ============================================================
+// 初期読み込み
+// ============================================================
+function loadData() {
+  showLoading('データ読み込み中...');
+  google.script.run
+    .withSuccessHandler(function(data) {
+      allData = data || [];
+      updateClientFilter();
+      renderFileList();
+      if (selectedFileId) {
+        var found = allData.find(function(d) { return d.file_id === selectedFileId; });
+        if (found) selectFile(found);
+        else clearEditor();
+      }
+      hideLoading();
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('データ取得エラー: ' + err.message);
+    })
+    .getDataFromSpreadsheet();
+}
+
+loadData();
+
+// ============================================================
+// ファイルリスト描画
+// ============================================================
+function updateClientFilter() {
+  var select = document.getElementById('clientFilter');
+  var current = select.value;
+  var clients = {};
+  allData.forEach(function(d) {
+    var c = d['取引先'];
+    if (c) clients[c] = true;
+  });
+  var sorted = Object.keys(clients).sort();
+  select.innerHTML = '<option value="">取引先：全て</option>' +
+    sorted.map(function(c) {
+      return '<option value="' + escapeAttr(c) + '">' + escapeHtml(c) + '</option>';
+    }).join('');
+  select.value = current;
+}
+
+function renderFileList() {
+  var list = document.getElementById('fileList');
+  var q = document.getElementById('searchBox').value.toLowerCase();
+  var dateFrom = document.getElementById('dateFrom').value;
+  var dateTo = document.getElementById('dateTo').value;
+  var clientVal = document.getElementById('clientFilter').value;
+  var filtered = allData.filter(function(d) {
+    if (currentFilter !== 'all' && d.status !== currentFilter) return false;
+    if (clientVal && d['取引先'] !== clientVal) return false;
+    if (q) {
+      var text = (d.file_name + ' ' + d['取引先'] + ' ' + d['作業所']).toLowerCase();
+      if (text.indexOf(q) === -1) return false;
+    }
+    if (dateFrom || dateTo) {
+      var dDate = String(d['日時']).substring(0, 10);
+      if (dateFrom && dDate < dateFrom) return false;
+      if (dateTo && dDate > dateTo) return false;
+    }
+    return true;
+  });
+
+  list.innerHTML = filtered.map(function(d) {
+    var sel = d.file_id === selectedFileId ? ' selected' : '';
+    var statusClass = d.status === '完了' ? 'completed' : 'pending';
+    return '<div class="file-item' + sel + '" onclick="selectFileById(\'' + d.file_id + '\')">' +
+      '<div class="fname">' + escapeHtml(d.file_name) + '</div>' +
+      '<div class="fmeta">' + escapeHtml(d['取引先'] || '') +
+      ' <span class="fstatus ' + statusClass + '">' + escapeHtml(d.status) + '</span></div>' +
+      '</div>';
+  }).join('');
+}
+
+function filterFiles() { renderFileList(); }
+
+function setFilter(val, btn) {
+  currentFilter = val;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderFileList();
+}
+
+// ============================================================
+// ファイル選択・エディタ描画
+// ============================================================
+function selectFileById(fileId) {
+  var d = allData.find(function(x) { return x.file_id === fileId; });
+  if (d) selectFile(d);
+}
+
+function selectFile(d) {
+  selectedFileId = d.file_id;
+  editMode = false;
+  pendingChanges = [];
+  renderFileList();
+  renderHeaderEditor(d);
+  renderDetailEditor(d);
+  showPreview(d.file_id);
+}
+
+function clearEditor() {
+  selectedFileId = null;
+  document.getElementById('headerEditor').innerHTML =
+    '<div class="empty-state"><div class="icon">📄</div><div>納品書を選択してください</div></div>';
+  document.getElementById('detailEditor').innerHTML = '';
+  hidePreview();
+}
+
+function renderHeaderEditor(d) {
+  var ro = editMode ? '' : 'readonly';
+  var fields = [
+    { key: '日時', label: '日時' },
+    { key: '納品書No', label: '納品書No' },
+    { key: '取引先', label: '取引先' },
+    { key: '作業所', label: '作業所' },
+    { key: '貸出期間', label: '貸出期間' },
+    { key: '請求計上日', label: '請求計上日' },
+    { key: '伝票摘要', label: '伝票摘要' },
+    { key: 'status', label: 'ステータス' }
+  ];
+
+  var html = '<div class="section-title">ヘッダー情報' +
+    '<div class="edit-actions">';
+  if (!editMode) {
+    html += '<button class="btn btn-primary" onclick="toggleEdit()">編集</button>';
+    html += '<button class="btn btn-danger" onclick="deleteFile()">削除</button>';
+  } else {
+    html += '<button class="btn btn-primary" onclick="saveChanges()">保存</button>';
+    html += '<button class="btn btn-secondary" onclick="cancelEdit()">キャンセル</button>';
+  }
+  html += '</div></div>';
+  html += '<div class="header-grid">';
+
+  fields.forEach(function(f) {
+    var val = d[f.key] || '';
+    var rowKey = d.items && d.items[0] ? d.items[0].row_key : '';
+    html += '<div class="form-group">' +
+      '<label>' + f.label + '</label>' +
+      '<input type="text" value="' + escapeAttr(val) + '" ' + ro +
+      ' data-field="' + f.key + '" data-rowkey="' + rowKey + '"' +
+      ' onchange="markChanged(this)">' +
+      '</div>';
+  });
+
+  html += '</div>';
+  document.getElementById('headerEditor').innerHTML = html;
+}
+
+function renderDetailEditor(d) {
+  var ro = editMode ? '' : 'readonly';
+  var items = d.items || [];
+  if (items.length === 0) {
+    document.getElementById('detailEditor').innerHTML = '<div class="empty-state"><div>明細データなし</div></div>';
+    return;
+  }
+
+  var html = '<div class="section-title">明細データ (' + items.length + '件)</div>';
+  html += '<table class="detail-table"><thead><tr>' +
+    '<th></th>' +
+    '<th>区分</th><th>機種</th><th>号機</th><th>型式</th><th>管理No</th>' +
+    '<th>数量</th><th>単位</th><th>単価</th><th>金額</th><th>基本管理料</th><th>備考</th>' +
+    '</tr></thead><tbody>';
+
+  items.forEach(function(item) {
+    html += '<tr>';
+    html += '<td class="del-cell">' + (editMode ? '<button class="row-del-btn" onclick="deleteRow(\'' + item.row_key + '\')" title="この行を削除">&times;</button>' : '') + '</td>';
+    ['区分', '機種', '号機', '型式', '管理No', '数量', '単位', '単価', '金額', '基本管理料', '備考'].forEach(function(key) {
+      var val = item[key] !== undefined ? item[key] : '';
+      html += '<td><input type="text" value="' + escapeAttr(val) + '" ' + ro +
+        ' data-field="' + key + '" data-rowkey="' + item.row_key + '"' +
+        ' onchange="markChanged(this)"></td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('detailEditor').innerHTML = html;
+}
+
+// ============================================================
+// 編集機能
+// ============================================================
+function toggleEdit() {
+  editMode = true;
+  var d = allData.find(function(x) { return x.file_id === selectedFileId; });
+  if (d) {
+    renderHeaderEditor(d);
+    renderDetailEditor(d);
+  }
+}
+
+function cancelEdit() {
+  editMode = false;
+  pendingChanges = [];
+  var d = allData.find(function(x) { return x.file_id === selectedFileId; });
+  if (d) selectFile(d);
+}
+
+function markChanged(input) {
+  if (!editMode) return;
+  input.classList.add('changed');
+  var key = input.getAttribute('data-rowkey');
+  var field = input.getAttribute('data-field');
+  var val = input.value;
+
+  // 重複除去して更新
+  pendingChanges = pendingChanges.filter(function(c) {
+    return !(c.row_key === key && c.field === field);
+  });
+  pendingChanges.push({ row_key: key, field: field, value: val });
+}
+
+function saveChanges() {
+  if (pendingChanges.length === 0) {
+    editMode = false;
+    var d = allData.find(function(x) { return x.file_id === selectedFileId; });
+    if (d) selectFile(d);
+    return;
+  }
+
+  showLoading('保存中...');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      pendingChanges = [];
+      editMode = false;
+      loadData();
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('保存エラー: ' + err.message);
+    })
+    .updateOrderData(pendingChanges);
+}
+
+function deleteRow(rowKey) {
+  if (!confirm('この明細行を削除しますか？')) return;
+  showLoading('削除中...');
+  google.script.run
+    .withSuccessHandler(function() {
+      loadData();
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('削除エラー: ' + err.message);
+    })
+    .deleteOrderRows([rowKey]);
+}
+
+function deleteFile() {
+  if (!selectedFileId) return;
+  var d = allData.find(function(x) { return x.file_id === selectedFileId; });
+  if (!d) return;
+  if (!confirm('「' + d.file_name + '」のデータを削除しますか？')) return;
+
+  var keys = d.items.map(function(item) { return item.row_key; });
+  showLoading('削除中...');
+  google.script.run
+    .withSuccessHandler(function() {
+      selectedFileId = null;
+      clearEditor();
+      loadData();
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('削除エラー: ' + err.message);
+    })
+    .deleteOrderRows(keys);
+}
+
+// ============================================================
+// PDFプレビュー（ズーム・パン機能付き）
+// ============================================================
+var pvScale = 1;
+var pvX = 0;
+var pvY = 0;
+
+function showPreview(fileId) {
+  var url = 'https://drive.google.com/file/d/' + fileId + '/preview';
+  document.getElementById('noPreview').style.display = 'none';
+  document.getElementById('previewContainer').style.display = 'block';
+  document.getElementById('previewControls').style.display = 'flex';
+  document.getElementById('pdfFrame').src = url;
+  pvReset();
+}
+
+function hidePreview() {
+  document.getElementById('noPreview').style.display = 'flex';
+  document.getElementById('previewContainer').style.display = 'none';
+  document.getElementById('previewControls').style.display = 'none';
+  document.getElementById('pdfFrame').src = '';
+}
+
+function pvZoom(delta) {
+  pvScale = Math.max(0.5, Math.min(3, pvScale + delta));
+  pvApply();
+}
+
+function pvPan(dx, dy) {
+  pvX += dx;
+  pvY += dy;
+  pvApply();
+}
+
+function pvReset() {
+  pvScale = 1;
+  pvX = 0;
+  pvY = 0;
+  pvApply();
+}
+
+function pvApply() {
+  var frame = document.getElementById('pdfFrame');
+  frame.style.transform = 'translate(' + pvX + 'px, ' + pvY + 'px) scale(' + pvScale + ')';
+  document.getElementById('zoomLabel').textContent = Math.round(pvScale * 100) + '%';
+}
+
+// ============================================================
+// PDFアップロード
+// ============================================================
+function handleFileUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    alert('PDFファイルを選択してください');
+    input.value = '';
+    return;
+  }
+
+  showLoading('PDF解析中...(1〜2分かかる場合があります)');
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result.split(',')[1];
+    google.script.run
+      .withSuccessHandler(function(result) {
+        input.value = '';
+        if (result.success) {
+          loadData();
+        } else {
+          hideLoading();
+          alert('処理エラー: ' + result.error);
+        }
+      })
+      .withFailureHandler(function(err) {
+        hideLoading();
+        input.value = '';
+        alert('アップロードエラー: ' + err.message);
+      })
+      .uploadAndProcessPDF(base64, file.name);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ============================================================
+// Excel出力
+// ============================================================
+function exportExcel() {
+  showLoading('Excel生成中...');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      hideLoading();
+      if (result.success) {
+        window.open(result.url, '_blank');
+      } else {
+        alert('出力エラー');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('Excel出力エラー: ' + err.message);
+    })
+    .exportToExcel();
+}
+
+// ============================================================
+// リサイザー
+// ============================================================
+function initResizers() {
+  // 左リサイザー
+  initVerticalResizer('resizerLeft', 'leftPane', null, 200, 500);
+  // 右リサイザー
+  initVerticalResizer('resizerRight', null, 'rightPane', 250, 600);
+  // 中央上下リサイザー
+  initHorizontalResizer('resizerMid', 'centerTop', null, 100, null);
+}
+
+function initVerticalResizer(resizerId, leftId, rightId, minW, maxW) {
+  var resizer = document.getElementById(resizerId);
+  var startX, startW, target, isLeft;
+
+  resizer.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    isLeft = !!leftId;
+    target = document.getElementById(leftId || rightId);
+    startX = e.clientX;
+    startW = target.offsetWidth;
+    resizer.classList.add('active');
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  function onMove(e) {
+    var diff = e.clientX - startX;
+    var newW;
+    if (isLeft) {
+      newW = startW + diff;
+    } else {
+      newW = startW - diff;
+    }
+    if (minW && newW < minW) newW = minW;
+    if (maxW && newW > maxW) newW = maxW;
+    target.style.width = newW + 'px';
+  }
+
+  function onUp() {
+    resizer.classList.remove('active');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+}
+
+function initHorizontalResizer(resizerId, topId) {
+  var resizer = document.getElementById(resizerId);
+  var topEl = document.getElementById(topId);
+  var startY, startH;
+
+  resizer.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    startY = e.clientY;
+    startH = topEl.offsetHeight;
+    resizer.classList.add('active');
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  function onMove(e) {
+    var newH = startH + (e.clientY - startY);
+    if (newH < 80) newH = 80;
+    topEl.style.height = newH + 'px';
+  }
+
+  function onUp() {
+    resizer.classList.remove('active');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+}
+
+initResizers();
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text || '処理中...';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escapeAttr(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>
