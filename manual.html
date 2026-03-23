@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>納品書管理ウェブアプリ 操作手順書</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif; background: #f8f9fa; color: #333; line-height: 1.7; }
+
+    /* ヘッダー */
+    .page-header { background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%); color: #fff; padding: 40px 0; text-align: center; }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .page-header p { font-size: 14px; opacity: 0.85; }
+
+    /* コンテナ */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* 目次 */
+    .toc { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px 32px; margin: 32px auto; }
+    .toc h2 { font-size: 18px; color: #1565c0; margin-bottom: 12px; border-bottom: 2px solid #e3f2fd; padding-bottom: 8px; }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: #1565c0; text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* セクション */
+    .section { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 32px; margin: 24px auto; }
+    .section h2 { font-size: 20px; color: #1565c0; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e3f2fd; }
+    .section h3 { font-size: 16px; color: #333; margin: 20px 0 10px; }
+    .section p { margin: 8px 0; font-size: 14px; }
+    .section ol, .section ul { padding-left: 24px; margin: 8px 0; font-size: 14px; }
+    .section li { margin: 4px 0; }
+
+    /* テーブル */
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+    th { background: #f5f5f5; padding: 8px 12px; border: 1px solid #e0e0e0; text-align: left; font-weight: 600; color: #555; white-space: nowrap; }
+    td { padding: 8px 12px; border: 1px solid #e0e0e0; }
+    tr:hover { background: #fafafa; }
+
+    /* 画像 */
+    .screenshot { margin: 16px 0; text-align: center; }
+    .screenshot img { max-width: 100%; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .screenshot .caption { font-size: 12px; color: #888; margin-top: 8px; font-style: italic; }
+
+    /* コードブロック */
+    pre { background: #263238; color: #eeffff; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0; font-family: 'Consolas', 'Monaco', monospace; }
+    code { background: #e8eaf6; color: #283593; padding: 2px 6px; border-radius: 3px; font-size: 13px; font-family: 'Consolas', 'Monaco', monospace; }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    /* 注意・ポイント */
+    .note { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 13px; }
+    .note strong { color: #e65100; }
+    .tip { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 13px; }
+    .tip strong { color: #2e7d32; }
+
+    /* レイアウト図 */
+    .layout-diagram { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+    .layout-diagram pre { background: #f5f5f5; color: #333; padding: 0; margin: 0; box-shadow: none; }
+
+    /* バッジ */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: #e8f5e9; color: #2e7d32; }
+    .badge-orange { background: #fff3e0; color: #e65100; }
+
+    /* フッター */
+    .footer { text-align: center; padding: 32px; color: #999; font-size: 12px; }
+
+    /* 印刷対応 */
+    @media print {
+      body { background: #fff; }
+      .page-header { background: #1565c0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section { box-shadow: none; border: 1px solid #e0e0e0; break-inside: avoid; }
+      .screenshot img { max-width: 80%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="page-header">
+  <div class="container">
+    <h1>納品書管理ウェブアプリ 操作手順書</h1>
+    <p>阪和建機向け — 納品書PDFをAI（Gemini）で自動解析し、Google Sheetsで管理するウェブアプリ</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 目次 -->
+  <nav class="toc">
+    <h2>目次</h2>
+    <ol>
+      <li><a href="#setup">初期セットアップ</a></li>
+      <li><a href="#access">アプリへのアクセス</a></li>
+      <li><a href="#layout">画面構成の概要</a></li>
+      <li><a href="#import">PDF取込（納品書の登録）</a></li>
+      <li><a href="#search">データの検索・フィルタ</a></li>
+      <li><a href="#edit">データの閲覧・編集</a></li>
+      <li><a href="#detail">明細行の操作</a></li>
+      <li><a href="#preview">PDFプレビュー</a></li>
+      <li><a href="#excel">Excel出力</a></li>
+      <li><a href="#dashboard">ダッシュボード（集計・グラフ）</a></li>
+      <li><a href="#sheet">スプレッドシート上のデータ</a></li>
+      <li><a href="#prompt">プロンプトのカスタマイズ</a></li>
+      <li><a href="#naming">PDFファイル名の命名規則</a></li>
+      <li><a href="#troubleshooting">トラブルシューティング</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. 初期セットアップ -->
+  <div class="section" id="setup">
+    <h2>1. 初期セットアップ</h2>
+
+    <h3>1-1. スプレッドシートの作成</h3>
+    <ol>
+      <li><a href="https://sheets.google.com" target="_blank">Google Sheets</a> で<strong>新規スプレッドシート</strong>を作成</li>
+      <li>メニューの「<strong>拡張機能</strong>」→「<strong>Apps Script</strong>」をクリックしてスクリプトエディタを開く</li>
+    </ol>
+
+    <h3>1-2. コードの配置</h3>
+    <p>スクリプトエディタに以下の3ファイルを配置します。</p>
+    <table>
+      <tr><th>ファイル</th><th>配置方法</th></tr>
+      <tr><td><code>Code.gs</code></td><td>デフォルトの <code>コード.gs</code> を開き、内容をすべて <code>Code.gs</code> の内容に置き換え</td></tr>
+      <tr><td><code>index.html</code></td><td>「+」ボタン →「<strong>HTML</strong>」を選択 → ファイル名を <code>index</code>（拡張子なし）にして、内容を貼り付け</td></tr>
+      <tr><td><code>dashboard.html</code></td><td>同様に <code>dashboard</code>（拡張子なし）という名前でHTMLファイルを追加</td></tr>
+    </table>
+
+    <h3>1-3. appsscript.json の設定</h3>
+    <ol>
+      <li>スクリプトエディタ左の<strong>歯車アイコン</strong>（プロジェクトの設定）をクリック</li>
+      <li>「<strong>「appsscript.json」マニフェストファイルをエディタで表示する</strong>」にチェック</li>
+      <li>エディタに表示された <code>appsscript.json</code> を本プロジェクトの内容に置き換え</li>
+    </ol>
+
+    <h3>1-4. スクリプトプロパティの設定</h3>
+    <p>「プロジェクトの設定」→「<strong>スクリプトプロパティ</strong>」に以下の2つを登録します。</p>
+    <table>
+      <tr><th>プロパティ名</th><th>設定する値</th></tr>
+      <tr><td><code>GEMINI_API_KEY</code></td><td><a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a> で取得した Gemini API キー</td></tr>
+      <tr><td><code>ROOT_FOLDER_ID</code></td><td>PDF保存先となる Google Drive フォルダのID（URLの <code>folders/</code> 以降の文字列）</td></tr>
+    </table>
+
+    <h3>1-5. デプロイ</h3>
+    <ol>
+      <li>「<strong>デプロイ</strong>」→「<strong>新しいデプロイ</strong>」をクリック</li>
+      <li>種類で「<strong>ウェブアプリ</strong>」を選択</li>
+      <li>説明文を入力（例: <code>納品書管理 v1</code>）</li>
+      <li>「次のユーザーとして実行」→ <strong>自分</strong></li>
+      <li>「アクセスできるユーザー」→ 必要に応じて設定</li>
+      <li>「<strong>デプロイ</strong>」をクリック</li>
+      <li>表示される<strong>URL</strong>をコピーして保存 → これがアプリのアクセスURLです</li>
+    </ol>
+
+    <div class="note">
+      <strong>注意:</strong> コード変更後は「デプロイ」→「デプロイを管理」→ 鉛筆アイコン → バージョンを「<strong>新バージョン</strong>」に変更 →「デプロイ」で更新が必要です。
+    </div>
+  </div>
+
+  <!-- 2. アプリへのアクセス -->
+  <div class="section" id="access">
+    <h2>2. アプリへのアクセス</h2>
+    <p>デプロイ時に発行されたURLにブラウザでアクセスします。</p>
+    <p>初回アクセス時にGoogleアカウントの<strong>認証許可</strong>を求められます。「許可」をクリックしてください。</p>
+    <p>認証が完了すると、以下のような<strong>データ管理画面</strong>が表示されます。</p>
+
+    <div class="screenshot">
+      <img src="{B93F87D6-BE6D-40DC-B176-1E29D244F654}.png" alt="データ管理画面（初期状態）">
+      <div class="caption">データ管理画面の初期状態 — 「納品書を選択してください」と表示されます</div>
+    </div>
+  </div>
+
+  <!-- 3. 画面構成の概要 -->
+  <div class="section" id="layout">
+    <h2>3. 画面構成の概要</h2>
+    <p>アプリは<strong>2つの画面</strong>で構成されています。</p>
+
+    <h3>データ管理画面（メイン）</h3>
+    <p>画面上部のナビバーにある「<strong>データ管理</strong>」タブが選択されている状態です。</p>
+
+    <div class="layout-diagram">
+<pre>┌──────────────────────────────────────────────────────────────┐
+│  納品書管理  [データ管理] [ダッシュボード]     [PDF取込] [Excel出力]  │  ← ナビバー
+├───────────┬──────────────────────┬────────────────────────────┤
+│ 左ペイン    │ 中央ペイン（上）       │ 右ペイン                    │
+│           │  ヘッダー情報          │  PDFプレビュー               │
+│ 検索ボックス │  日時・取引先・        │                            │
+│ フィルタ    │  作業所 等            │  ズーム・パン操作             │
+│           │──────────────────────│                            │
+│ ファイル    │ 中央ペイン（下）       │                            │
+│  一覧      │  明細テーブル          │                            │
+├───────────┴──────────────────────┴────────────────────────────┤
+│  各ペインの境界はドラッグでサイズ調整可能                             │
+└──────────────────────────────────────────────────────────────┘</pre>
+    </div>
+
+    <table>
+      <tr><th>エリア</th><th>役割</th></tr>
+      <tr><td><strong>ナビバー</strong></td><td>画面切替、PDF取込ボタン、Excel出力ボタン</td></tr>
+      <tr><td><strong>左ペイン</strong></td><td>ファイル検索・フィルタ・ファイル一覧</td></tr>
+      <tr><td><strong>中央ペイン（上）</strong></td><td>選択したファイルのヘッダー情報（日時、取引先、作業所など）</td></tr>
+      <tr><td><strong>中央ペイン（下）</strong></td><td>明細テーブル（品目・数量・金額など）</td></tr>
+      <tr><td><strong>右ペイン</strong></td><td>元のPDFプレビュー</td></tr>
+    </table>
+
+    <h3>ダッシュボード画面</h3>
+    <p>ナビバーの「<strong>ダッシュボード</strong>」をクリックすると、グラフ・集計画面に切り替わります。</p>
+  </div>
+
+  <!-- 4. PDF取込 -->
+  <div class="section" id="import">
+    <h2>4. PDF取込（納品書の登録）</h2>
+    <p>これがアプリの最も重要な機能です。納品書PDFをアップロードすると、AIが自動で内容を読み取りデータ化します。</p>
+
+    <h3>手順</h3>
+    <ol>
+      <li>ナビバー右側の「<strong>PDF取込</strong>」ボタンをクリック</li>
+      <li>ファイル選択ダイアログが開くので、納品書の<strong>PDFファイル</strong>を選択（複数選択可）</li>
+      <li>自動的に以下の処理が実行されます:
+        <ul>
+          <li>PDFが Google Drive の指定フォルダにアップロード</li>
+          <li>Gemini AI がPDFの内容を解析</li>
+          <li>日時・取引先・作業所・明細などのデータを自動抽出</li>
+          <li>スプレッドシートの「納品書データ」シートにデータを追記</li>
+        </ul>
+      </li>
+      <li>処理が完了すると、左ペインのファイル一覧に新しいファイルが表示されます</li>
+    </ol>
+
+    <div class="tip">
+      <strong>ポイント:</strong> PDFファイルの命名規則に従ってファイル名をつけると、取引先名と機種が自動で抽出されます（<a href="#naming">13章参照</a>）。
+    </div>
+
+    <div class="note">
+      <strong>注意:</strong> GASの実行時間制限（6分）があるため、PDFは1件ずつ処理されます。大量のPDFを一度に取り込む場合は少しずつアップロードしてください。
+    </div>
+  </div>
+
+  <!-- 5. データの検索・フィルタ -->
+  <div class="section" id="search">
+    <h2>5. データの検索・フィルタ</h2>
+    <p>左ペインでファイルの絞り込みができます。</p>
+
+    <h3>テキスト検索</h3>
+    <ul>
+      <li>左上の<strong>検索ボックス</strong>にキーワードを入力</li>
+      <li>ファイル名・取引先名・作業所名で部分一致検索されます</li>
+    </ul>
+
+    <h3>ステータスフィルタ</h3>
+    <ul>
+      <li>「<strong>全て</strong>」「<strong>完了</strong>」「<strong>未処理</strong>」ボタンで切り替え</li>
+      <li>完了: <span class="badge badge-green">完了</span></li>
+      <li>未処理: <span class="badge badge-orange">未処理</span></li>
+    </ul>
+
+    <h3>日付範囲フィルタ</h3>
+    <ul>
+      <li>「開始日」〜「終了日」を指定して、該当期間のデータに絞り込み</li>
+    </ul>
+
+    <h3>取引先ドロップダウン</h3>
+    <ul>
+      <li>登録済みの取引先一覧から選択してフィルタリング</li>
+    </ul>
+  </div>
+
+  <!-- 6. データの閲覧・編集 -->
+  <div class="section" id="edit">
+    <h2>6. データの閲覧・編集</h2>
+
+    <h3>閲覧</h3>
+    <ol>
+      <li>左ペインのファイル一覧から、確認したいファイルを<strong>クリック</strong></li>
+      <li>中央ペイン上部に<strong>ヘッダー情報</strong>（日時、納品書No、取引先、作業所など）が表示</li>
+      <li>中央ペイン下部に<strong>明細テーブル</strong>（品目・数量・単価・金額など）が表示</li>
+      <li>右ペインに元の<strong>PDFプレビュー</strong>が表示</li>
+    </ol>
+
+    <h3>編集</h3>
+    <ol>
+      <li>中央ペインの「<strong>編集</strong>」ボタンをクリック → 編集モードに切り替わり</li>
+      <li>ヘッダー情報のフォーム、明細テーブルのセルが<strong>編集可能</strong>になります</li>
+      <li>変更したセルは<strong style="background:#fffde7;padding:2px 4px;border:1px solid #f9a825;border-radius:2px;">黄色でハイライト</strong>されます</li>
+      <li>日時・請求計上日は<strong>カレンダーピッカー</strong>で日付を選択できます</li>
+      <li>編集が完了したら「<strong>保存</strong>」ボタンをクリック</li>
+      <li>変更を取り消す場合は「<strong>キャンセル</strong>」ボタンをクリック</li>
+    </ol>
+
+    <h3>ファイル単位の一括削除</h3>
+    <ul>
+      <li>編集モード中に「<strong>削除</strong>」ボタンをクリックすると、そのファイルに紐づく全データを削除できます</li>
+    </ul>
+  </div>
+
+  <!-- 7. 明細行の操作 -->
+  <div class="section" id="detail">
+    <h2>7. 明細行の操作</h2>
+
+    <h3>明細行の編集</h3>
+    <ul>
+      <li>編集モード時、各セルを直接クリックして値を変更できます</li>
+      <li>区分（販売/レンタル）、機種、型式、数量、単価、金額など全項目が編集可能</li>
+    </ul>
+
+    <h3>明細行の削除</h3>
+    <ul>
+      <li>編集モード時、各行の左端に<strong style="color:#c62828;">×（削除）ボタン</strong>が表示されます</li>
+      <li>クリックすると、その明細行が削除されます</li>
+    </ul>
+
+    <h3>列幅の調整</h3>
+    <ul>
+      <li>明細テーブルのヘッダー行の<strong>列境界をドラッグ</strong>すると、列幅を自由に調整できます</li>
+    </ul>
+  </div>
+
+  <!-- 8. PDFプレビュー -->
+  <div class="section" id="preview">
+    <h2>8. PDFプレビュー</h2>
+    <p>右ペインに元のPDFを表示して、データと照合確認ができます。</p>
+
+    <h3>操作コントロール</h3>
+    <table>
+      <tr><th>ボタン</th><th>機能</th></tr>
+      <tr><td><strong>← → ↑ ↓</strong></td><td>パン移動（PDFの表示位置を移動）</td></tr>
+      <tr><td><strong>−</strong></td><td>ズームアウト（縮小）</td></tr>
+      <tr><td><strong>%</strong> 表示</td><td>現在のズーム倍率を表示</td></tr>
+      <tr><td><strong>+</strong></td><td>ズームイン（拡大）</td></tr>
+      <tr><td><strong>↺</strong></td><td>表示をリセット（初期位置・倍率に戻す）</td></tr>
+    </table>
+    <ul>
+      <li>ズーム範囲: 50% 〜 300%</li>
+      <li>PDFと入力データを並べて照合確認するのに便利です</li>
+    </ul>
+  </div>
+
+  <!-- 9. Excel出力 -->
+  <div class="section" id="excel">
+    <h2>9. Excel出力</h2>
+    <p>登録データをExcelファイルとしてダウンロードできます。</p>
+
+    <h3>手順</h3>
+    <ol>
+      <li>ナビバー右側の「<strong>Excel出力</strong>」ボタンをクリック</li>
+      <li>スプレッドシートのデータが<strong>.xlsx形式</strong>でエクスポートされます</li>
+      <li>Google Drive に保存され、<strong>ダウンロードURL</strong>が返却されます</li>
+      <li>URLをクリックしてファイルをダウンロード</li>
+    </ol>
+  </div>
+
+  <!-- 10. ダッシュボード -->
+  <div class="section" id="dashboard">
+    <h2>10. ダッシュボード（集計・グラフ）</h2>
+
+    <h3>アクセス方法</h3>
+    <p>ナビバーの「<strong>ダッシュボード</strong>」をクリック</p>
+
+    <h3>表示されるグラフ（4種類）</h3>
+    <table>
+      <tr><th>グラフ</th><th>種類</th><th>表示内容</th></tr>
+      <tr><td><strong>月別金額推移</strong></td><td>縦棒グラフ</td><td>月ごとの合計金額の推移</td></tr>
+      <tr><td><strong>取引先別集計</strong></td><td>円グラフ</td><td>取引先ごとの金額割合</td></tr>
+      <tr><td><strong>機種別集計</strong></td><td>横棒グラフ</td><td>機種ごとの金額合計</td></tr>
+      <tr><td><strong>明細サマリー</strong></td><td>テーブル</td><td>取引先別の金額一覧＋合計行</td></tr>
+    </table>
+
+    <h3>日付フィルタ</h3>
+    <ul>
+      <li>画面上部の<strong>開始日・終了日</strong>を指定して「<strong>適用</strong>」ボタンをクリック</li>
+      <li>全グラフが指定期間で再描画されます</li>
+      <li>「<strong>リセット</strong>」ボタンで全期間に戻ります</li>
+    </ul>
+  </div>
+
+  <!-- 11. スプレッドシート上のデータ -->
+  <div class="section" id="sheet">
+    <h2>11. スプレッドシート上のデータ</h2>
+    <p>アプリで取り込んだデータは、紐づいた<strong>Googleスプレッドシート</strong>に自動保存されます。</p>
+
+    <div class="screenshot">
+      <img src="{D57F6B0F-BCE1-4D9C-A24D-768CD972BB99}.png" alt="スプレッドシートのデータ">
+      <div class="caption">「納品書データ」シートと「プロンプト」シートが自動作成されます</div>
+    </div>
+
+    <h3>「納品書データ」シート（24列）</h3>
+    <p>本アプリで処理したすべてのデータを閲覧できます。</p>
+
+    <div class="screenshot">
+      <img src="{006B13FD-6D79-4EF2-B37F-728288E9D810}.png" alt="納品書データの内容">
+      <div class="caption">日時、取引先、作業所、機種、型式、金額などが一覧表示されます</div>
+    </div>
+
+    <table>
+      <tr><th>区分</th><th>列名</th><th>説明</th></tr>
+      <tr><td>管理</td><td>row_key</td><td>内部キー（fileId_index）</td></tr>
+      <tr><td>管理</td><td>file_id</td><td>Google Drive ファイルID</td></tr>
+      <tr><td>管理</td><td>file_name</td><td>ファイル名</td></tr>
+      <tr><td>管理</td><td>status</td><td>未処理 / 完了</td></tr>
+      <tr><td>ヘッダー</td><td>日時</td><td>納品書の日付</td></tr>
+      <tr><td>ヘッダー</td><td>納品書No</td><td>文書番号</td></tr>
+      <tr><td>ヘッダー</td><td>取引先</td><td>取引先名（ファイル名から自動抽出）</td></tr>
+      <tr><td>ヘッダー</td><td>作業所</td><td>現場名</td></tr>
+      <tr><td>ヘッダー</td><td>貸出期間</td><td>貸出期間</td></tr>
+      <tr><td>ヘッダー</td><td>請求計上日</td><td>請求計上日</td></tr>
+      <tr><td>ヘッダー</td><td>伝票摘要</td><td>伝票摘要</td></tr>
+      <tr><td>明細</td><td>区分</td><td>販売 / レンタル</td></tr>
+      <tr><td>明細</td><td>機種</td><td>型番（例: JCL-015C）</td></tr>
+      <tr><td>明細</td><td>号機</td><td>号機番号</td></tr>
+      <tr><td>明細</td><td>型式</td><td>品名（例: 月例点検費）</td></tr>
+      <tr><td>明細</td><td>管理No</td><td>管理番号</td></tr>
+      <tr><td>明細</td><td>数量</td><td>数量</td></tr>
+      <tr><td>明細</td><td>単位</td><td>回、台、式 等</td></tr>
+      <tr><td>明細</td><td>単価</td><td>単価</td></tr>
+      <tr><td>明細</td><td>金額</td><td>金額</td></tr>
+      <tr><td>明細</td><td>基本管理料</td><td>基本管理料</td></tr>
+      <tr><td>明細</td><td>備考</td><td>備考</td></tr>
+      <tr><td>管理</td><td>processed_at</td><td>処理日時</td></tr>
+      <tr><td>管理</td><td>item_order</td><td>行番号</td></tr>
+    </table>
+  </div>
+
+  <!-- 12. プロンプトのカスタマイズ -->
+  <div class="section" id="prompt">
+    <h2>12. プロンプトのカスタマイズ</h2>
+    <p>Gemini AIに送信するプロンプトは、スプレッドシートの「<strong>プロンプト</strong>」シートで管理されています。</p>
+
+    <h3>変更方法</h3>
+    <ol>
+      <li>スプレッドシートの「<strong>プロンプト</strong>」タブをクリック</li>
+      <li><strong>A1セル</strong>にプロンプトが格納されています</li>
+      <li>内容を直接編集して保存</li>
+    </ol>
+
+    <div class="tip">
+      <strong>メリット:</strong> コードの再デプロイなしでプロンプトの調整が可能です。AI解析の精度を向上させたい場合はここを調整してください。
+    </div>
+  </div>
+
+  <!-- 13. PDFファイル名の命名規則 -->
+  <div class="section" id="naming">
+    <h2>13. PDFファイル名の命名規則</h2>
+    <p>取引先名と機種はPDFファイル名から自動抽出されます。以下の命名規則に従うと正しく抽出されます。</p>
+
+    <h3>フォーマット</h3>
+    <pre><code>{取引先名}_{作業所名}_{機種}_{その他}.pdf</code></pre>
+
+    <h3>区切り文字</h3>
+    <p>以下の3種類の区切り文字に対応しています:</p>
+    <ul>
+      <li><code>_</code>（半角アンダースコア）</li>
+      <li><code>＿</code>（全角アンダースコア）</li>
+      <li><code>‗</code>（U+2017 ダブルアンダースコア）</li>
+    </ul>
+
+    <h3>抽出ルール</h3>
+    <table>
+      <tr><th>項目</th><th>抽出位置</th></tr>
+      <tr><td><strong>取引先</strong></td><td>最初の区切り文字の手前（先頭部分）</td></tr>
+      <tr><td><strong>機種</strong></td><td>右から見て最初の区切りと次の区切りの間（後ろから2番目の要素）</td></tr>
+    </table>
+
+    <h3>例</h3>
+    <p>ファイル名: <code>AKｺｰﾎﾟﾚｰｼｮﾝ‗MOTHER4新築工事_JCL-015C_月例.pdf</code></p>
+    <ul>
+      <li><strong>取引先</strong> → <code>AKｺｰﾎﾟﾚｰｼｮﾝ</code></li>
+      <li><strong>機種</strong> → <code>JCL-015C</code></li>
+    </ul>
+  </div>
+
+  <!-- 14. トラブルシューティング -->
+  <div class="section" id="troubleshooting">
+    <h2>14. トラブルシューティング</h2>
+
+    <h3>よくある問題と対処法</h3>
+    <table>
+      <tr><th>症状</th><th>原因・対処法</th></tr>
+      <tr><td>アプリにアクセスできない</td><td>デプロイURLが正しいか確認。コード変更後は「デプロイを管理」から新バージョンでデプロイ更新が必要</td></tr>
+      <tr><td>PDF取込でエラーが出る</td><td><code>GEMINI_API_KEY</code> と <code>ROOT_FOLDER_ID</code> がスクリプトプロパティに正しく設定されているか確認</td></tr>
+      <tr><td>PDFプレビューが表示されない</td><td>Google Driveのアクセス権限を確認。閲覧権限が必要</td></tr>
+      <tr><td>AI解析の精度が低い</td><td>「プロンプト」シートのA1セルでプロンプトを調整</td></tr>
+      <tr><td>処理がタイムアウトする</td><td>GASの実行時間制限は6分。PDFを1件ずつアップロード</td></tr>
+      <tr><td>取引先名・機種が空になる</td><td>PDFファイル名が命名規則に沿っているか確認（<a href="#naming">13章参照</a>）</td></tr>
+      <tr><td>データが表示されない</td><td>スプレッドシートの「納品書データ」シートにデータがあるか確認</td></tr>
+      <tr><td>ダッシュボードが空白</td><td>データが存在するか確認。日付フィルタが適用されている場合はリセット</td></tr>
+    </table>
+
+    <h3>サポート</h3>
+    <p>問題が解決しない場合は、スプレッドシートのメニュー「<strong>拡張機能</strong>」→「<strong>Apps Script</strong>」→「<strong>実行ログ</strong>」でエラーの詳細を確認してください。</p>
+  </div>
+
+  <!-- フッター -->
+  <div class="footer">
+    <p>納品書管理ウェブアプリ 操作手順書 — 2026年3月23日 作成</p>
+  </div>
+
+</div>
+
+</body>
+</html>
