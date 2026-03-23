@@ -33,34 +33,10 @@
     .section li { margin: 4px 0; }
 
     /* テーブル */
-    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
-    th { background: #f5f5f5; padding: 8px 12px; border: 1px solid #e0e0e0; text-align: left; font-weight: 600; color: #555; white-space: nowrap; }
-    td { padding: 8px 12px; border: 1px solid #e0e0e0; }
-    tr:hover { background: #fafafa; }
-
-    /* 画像 */
-    .screenshot { margin: 16px 0; text-align: center; }
-    .screenshot img { max-width: 100%; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .screenshot .caption { font-size: 12px; color: #888; margin-top: 8px; font-style: italic; }
-
-    /* スクリーンショットプレースホルダー */
-    .screenshot-placeholder { margin: 16px 0; text-align: center; }
-    .screenshot-placeholder .placeholder-box {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-      border: 2px dashed #b0bec5; border-radius: 8px;
-      padding: 32px 24px; min-height: 180px;
-      color: #78909c; font-size: 13px;
-    }
-    .screenshot-placeholder .placeholder-box .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
-    .screenshot-placeholder .placeholder-box .label { font-weight: 600; margin-bottom: 4px; color: #546e7a; }
-    .screenshot-placeholder .placeholder-box .hint { font-size: 11px; color: #90a4ae; }
-    .screenshot-placeholder .caption { font-size: 12px; color: #888; margin-top: 8px; font-style: italic; }
-
-    /* コードブロック */
-    pre { background: #263238; color: #eeffff; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0; font-family: 'Consolas', 'Monaco', monospace; }
-    code { background: #e8eaf6; color: #283593; padding: 2px 6px; border-radius: 3px; font-size: 13px; font-family: 'Consolas', 'Monaco', monospace; }
-    pre code { background: none; color: inherit; padding: 0; }
+    table.doc-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+    .doc-table th { background: #f5f5f5; padding: 8px 12px; border: 1px solid #e0e0e0; text-align: left; font-weight: 600; color: #555; white-space: nowrap; }
+    .doc-table td { padding: 8px 12px; border: 1px solid #e0e0e0; }
+    .doc-table tr:hover { background: #fafafa; }
 
     /* 注意・ポイント */
     .note { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 13px; }
@@ -68,36 +44,63 @@
     .tip { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 13px; }
     .tip strong { color: #2e7d32; }
 
-    /* レイアウト図 */
-    .layout-diagram { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; margin: 16px 0; overflow-x: auto; }
-    .layout-diagram pre { background: #f5f5f5; color: #333; padding: 0; margin: 0; box-shadow: none; }
+    /* コードブロック */
+    pre { background: #263238; color: #eeffff; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0; font-family: 'Consolas', 'Monaco', monospace; }
+    code { background: #e8eaf6; color: #283593; padding: 2px 6px; border-radius: 3px; font-size: 13px; font-family: 'Consolas', 'Monaco', monospace; }
+    pre code { background: none; color: inherit; padding: 0; }
 
     /* バッジ */
     .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
     .badge-green { background: #e8f5e9; color: #2e7d32; }
     .badge-orange { background: #fff3e0; color: #e65100; }
 
-    /* ステップ番号付き手順 */
-    .step-list { counter-reset: step-counter; list-style: none; padding-left: 0; }
-    .step-list li { counter-increment: step-counter; position: relative; padding-left: 40px; margin: 12px 0; }
-    .step-list li::before {
-      content: counter(step-counter);
-      position: absolute; left: 0; top: 0;
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #1565c0; color: #fff; font-size: 13px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-    }
-
     /* フッター */
     .footer { text-align: center; padding: 32px; color: #999; font-size: 12px; }
+
+    /* ========================================
+       アプリUIモックアップ共通スタイル
+       ======================================== */
+    .mock-frame {
+      border: 1px solid #ccc; border-radius: 8px; overflow: hidden;
+      margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      font-size: 13px; color: #333; background: #f4f6f8;
+    }
+    .mock-frame * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ナビバー */
+    .mock-navbar {
+      background: #1565c0; color: #fff; display: flex; align-items: center;
+      padding: 0 16px; height: 42px; gap: 10px; font-size: 13px;
+    }
+    .mock-navbar .m-title { font-size: 15px; font-weight: 600; margin-right: 20px; }
+    .mock-navbar .m-tab {
+      color: rgba(255,255,255,0.75); padding: 5px 10px; border-radius: 4px;
+      font-size: 12px; text-decoration: none;
+    }
+    .mock-navbar .m-tab.active { background: rgba(255,255,255,0.2); color: #fff; }
+    .mock-navbar .m-spacer { flex: 1; }
+    .mock-navbar .m-btn {
+      background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 12px; border-radius: 4px; font-size: 12px;
+    }
+
+    /* モック内テキスト */
+    .mock-caption { font-size: 12px; color: #888; margin-top: 8px; text-align: center; font-style: italic; }
+
+    /* アノテーション矢印ラベル */
+    .anno {
+      display: inline-block; background: #ff5722; color: #fff; font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; position: absolute; white-space: nowrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
 
     /* 印刷対応 */
     @media print {
       body { background: #fff; }
       .page-header { background: #1565c0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .section { box-shadow: none; border: 1px solid #e0e0e0; break-inside: avoid; }
-      .screenshot img { max-width: 80%; }
-      .screenshot-placeholder .placeholder-box { border-color: #ccc; }
+      .mock-frame { box-shadow: none; border: 1px solid #ccc; }
     }
   </style>
 </head>
@@ -131,7 +134,9 @@
     </ol>
   </nav>
 
+  <!-- ============================================================ -->
   <!-- 1. アプリへのアクセス -->
+  <!-- ============================================================ -->
   <div class="section" id="access">
     <h2>1. アプリへのアクセス</h2>
     <p>管理者から共有された<strong>アプリURL</strong>にブラウザでアクセスしてください。</p>
@@ -140,181 +145,375 @@
     <ol>
       <li>URLにアクセスすると、Googleアカウントの<strong>認証許可</strong>を求められます</li>
       <li>「<strong>許可</strong>」をクリックしてください</li>
-      <li>認証が完了すると、データ管理画面が表示されます</li>
+      <li>認証が完了すると、以下のようなデータ管理画面が表示されます</li>
     </ol>
 
-    <div class="screenshot">
-      <img src="{B93F87D6-BE6D-40DC-B176-1E29D244F654}.png" alt="データ管理画面（初期状態）">
-      <div class="caption">初回アクセス後の画面 — 「納品書を選択してください」と表示されます</div>
+    <!-- モック: 初期画面 -->
+    <div class="mock-frame">
+      <div class="mock-navbar">
+        <span class="m-title">納品書管理</span>
+        <span class="m-tab active">データ管理</span>
+        <span class="m-tab">ダッシュボード</span>
+        <span class="mock-navbar .m-spacer" style="flex:1;"></span>
+        <span class="m-btn">PDF取込</span>
+        <span class="m-btn">Excel出力</span>
+      </div>
+      <div style="display:flex; height:280px;">
+        <!-- 左ペイン -->
+        <div style="width:200px; background:#fff; border-right:1px solid #e0e0e0; padding:10px; flex-shrink:0;">
+          <div style="padding:6px 8px; border:1px solid #ddd; border-radius:4px; color:#aaa; font-size:12px;">検索...</div>
+          <div style="display:flex; gap:4px; margin-top:8px;">
+            <div style="padding:4px 6px; border:1px solid #ddd; border-radius:4px; font-size:11px; color:#aaa; flex:1; text-align:center;">開始日</div>
+            <span style="font-size:11px; color:#888; line-height:26px;">〜</span>
+            <div style="padding:4px 6px; border:1px solid #ddd; border-radius:4px; font-size:11px; color:#aaa; flex:1; text-align:center;">終了日</div>
+          </div>
+          <div style="padding:5px 8px; border:1px solid #ddd; border-radius:4px; color:#aaa; font-size:11px; margin-top:8px;">取引先：全て ▾</div>
+          <div style="display:flex; gap:3px; margin-top:8px;">
+            <div style="flex:1; padding:4px; border:1px solid #1565c0; background:#1565c0; color:#fff; border-radius:4px; font-size:11px; text-align:center;">全て</div>
+            <div style="flex:1; padding:4px; border:1px solid #ddd; border-radius:4px; font-size:11px; text-align:center; color:#555;">完了</div>
+            <div style="flex:1; padding:4px; border:1px solid #ddd; border-radius:4px; font-size:11px; text-align:center; color:#555;">未処理</div>
+          </div>
+          <div style="color:#aaa; font-size:12px; text-align:center; margin-top:40px;">ファイル一覧がここに表示</div>
+        </div>
+        <!-- 中央ペイン -->
+        <div style="flex:1; display:flex; flex-direction:column;">
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#fff; flex-direction:column; color:#aaa;">
+            <div style="font-size:36px; margin-bottom:8px;">&#128196;</div>
+            <div style="font-size:13px;">納品書を選択してください</div>
+          </div>
+          <div style="height:3px; background:#e0e0e0;"></div>
+          <div style="flex:1; background:#fafafa;"></div>
+        </div>
+        <!-- 右ペイン -->
+        <div style="width:180px; background:#fff; border-left:1px solid #e0e0e0; flex-shrink:0;">
+          <div style="padding:5px 10px; font-size:11px; color:#888; border-bottom:1px solid #e0e0e0; background:#fafafa;">PDFプレビュー</div>
+          <div style="display:flex; align-items:center; justify-content:center; height:calc(100% - 30px); color:#aaa; font-size:12px;">プレビューなし</div>
+        </div>
+      </div>
     </div>
+    <div class="mock-caption">初回アクセス後の画面 &mdash; 「納品書を選択してください」と表示されます</div>
 
     <div class="tip">
       <strong>ポイント:</strong> 2回目以降は認証なしで直接画面が表示されます。ブックマークしておくと便利です。
     </div>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 2. 画面構成の概要 -->
+  <!-- ============================================================ -->
   <div class="section" id="layout">
     <h2>2. 画面構成の概要</h2>
     <p>アプリは<strong>2つの画面</strong>で構成されています。ナビバーのタブで切り替えます。</p>
 
     <h3>データ管理画面（メイン）</h3>
-    <p>納品書データの確認・編集を行うメイン画面です。</p>
+    <p>納品書データの確認・編集を行うメイン画面です。画面は大きく<strong>4つのエリア</strong>に分かれています。</p>
 
-    <div class="layout-diagram">
-<pre>┌──────────────────────────────────────────────────────────────┐
-│  納品書管理  [データ管理] [ダッシュボード]     [PDF取込] [Excel出力]  │  ← ナビバー
-├───────────┬──────────────────────┬────────────────────────────┤
-│ 左ペイン    │ 中央ペイン（上）       │ 右ペイン                    │
-│           │  ヘッダー情報          │  PDFプレビュー               │
-│ 検索ボックス │  日時・取引先・        │                            │
-│ フィルタ    │  作業所 等            │  ズーム・パン操作             │
-│           │──────────────────────│                            │
-│ ファイル    │ 中央ペイン（下）       │                            │
-│  一覧      │  明細テーブル          │                            │
-├───────────┴──────────────────────┴────────────────────────────┤
-│  各ペインの境界はドラッグでサイズ調整可能                             │
-└──────────────────────────────────────────────────────────────┘</pre>
+    <!-- モック: レイアウト図（アノテーション付き） -->
+    <div class="mock-frame" style="position:relative;">
+      <div class="mock-navbar">
+        <span class="m-title">納品書管理</span>
+        <span class="m-tab active">データ管理</span>
+        <span class="m-tab">ダッシュボード</span>
+        <span style="flex:1;"></span>
+        <span class="m-btn">PDF取込</span>
+        <span class="m-btn">Excel出力</span>
+      </div>
+      <div style="display:flex; height:300px; position:relative;">
+        <!-- 左ペイン -->
+        <div style="width:180px; background:#fff; border-right:1px solid #e0e0e0; padding:10px; flex-shrink:0; position:relative;">
+          <div style="padding:5px 8px; border:1px solid #ddd; border-radius:4px; color:#aaa; font-size:11px;">検索...</div>
+          <div style="display:flex; gap:3px; margin-top:6px;">
+            <div style="flex:1;padding:3px;border:1px solid #1565c0;background:#1565c0;color:#fff;border-radius:3px;font-size:10px;text-align:center;">全て</div>
+            <div style="flex:1;padding:3px;border:1px solid #ddd;border-radius:3px;font-size:10px;text-align:center;color:#555;">完了</div>
+            <div style="flex:1;padding:3px;border:1px solid #ddd;border-radius:3px;font-size:10px;text-align:center;color:#555;">未処理</div>
+          </div>
+          <!-- ファイルリスト -->
+          <div style="margin-top:10px;">
+            <div style="padding:7px 8px; background:#e3f2fd; border-left:3px solid #1565c0; border-bottom:1px solid #f0f0f0;">
+              <div style="font-size:11px; font-weight:500;">ニッセツ_関根工務店_HSL...</div>
+              <div style="font-size:10px; color:#888; margin-top:2px;">ニッセツ <span style="background:#e8f5e9;color:#2e7d32;font-size:9px;padding:1px 5px;border-radius:6px;">完了</span></div>
+            </div>
+            <div style="padding:7px 8px; border-bottom:1px solid #f0f0f0;">
+              <div style="font-size:11px; font-weight:500;">太陽建設_兵庫区_HUC...</div>
+              <div style="font-size:10px; color:#888; margin-top:2px;">太陽建設 <span style="background:#e8f5e9;color:#2e7d32;font-size:9px;padding:1px 5px;border-radius:6px;">完了</span></div>
+            </div>
+            <div style="padding:7px 8px; border-bottom:1px solid #f0f0f0;">
+              <div style="font-size:11px; font-weight:500;">マサノ建装_京町堀1丁目...</div>
+              <div style="font-size:10px; color:#888; margin-top:2px;">マサノ建装 <span style="background:#fff3e0;color:#e65100;font-size:9px;padding:1px 5px;border-radius:6px;">未処理</span></div>
+            </div>
+            <div style="padding:7px 8px; border-bottom:1px solid #f0f0f0;">
+              <div style="font-size:11px; font-weight:500;">侍建設_東淀川区_NSA...</div>
+              <div style="font-size:10px; color:#888; margin-top:2px;">侍建設 <span style="background:#fff3e0;color:#e65100;font-size:9px;padding:1px 5px;border-radius:6px;">未処理</span></div>
+            </div>
+          </div>
+          <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);background:#1565c0;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;z-index:5;">&#9312; 左ペイン</div>
+        </div>
+
+        <!-- 中央ペイン -->
+        <div style="flex:1; display:flex; flex-direction:column; position:relative;">
+          <!-- 中央上: ヘッダー -->
+          <div style="height:55%; background:#fff; padding:10px 14px; overflow:hidden;">
+            <div style="font-size:12px; font-weight:600; color:#1565c0; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+              ヘッダー情報
+              <div style="display:flex; gap:4px;">
+                <span style="padding:3px 10px; background:#1565c0; color:#fff; border-radius:3px; font-size:10px;">編集</span>
+                <span style="padding:3px 10px; border:1px solid #c62828; color:#c62828; border-radius:3px; font-size:10px;">削除</span>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+              <div><div style="font-size:9px;color:#888;">日時</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f9f9f9;">2026/03/14</div></div>
+              <div><div style="font-size:9px;color:#888;">納品書No</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f9f9f9;">107082</div></div>
+              <div><div style="font-size:9px;color:#888;">取引先</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f9f9f9;">ニッセツ</div></div>
+              <div><div style="font-size:9px;color:#888;">作業所</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f9f9f9;">関根工務店 第2関根マンション</div></div>
+              <div><div style="font-size:9px;color:#888;">貸出期間</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f9f9f9;"></div></div>
+              <div><div style="font-size:9px;color:#888;">ステータス</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f9f9f9;">完了</div></div>
+            </div>
+            <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);background:#1565c0;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;z-index:5;">&#9313; 中央ペイン（上）</div>
+          </div>
+          <div style="height:3px; background:#e0e0e0;"></div>
+          <!-- 中央下: 明細 -->
+          <div style="flex:1; background:#fafafa; padding:10px 14px; overflow:hidden; position:relative;">
+            <div style="font-size:12px; font-weight:600; color:#1565c0; margin-bottom:6px;">明細データ (2件)</div>
+            <table style="border-collapse:collapse; font-size:10px; width:100%;">
+              <tr style="background:#f5f5f5;">
+                <th style="padding:4px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">区分</th>
+                <th style="padding:4px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">機種</th>
+                <th style="padding:4px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">型式</th>
+                <th style="padding:4px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">数量</th>
+                <th style="padding:4px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">単価</th>
+                <th style="padding:4px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">金額</th>
+              </tr>
+              <tr>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">レンタル</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">HSL-900CIII</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">月例点検費</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">1</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">レンタル</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">HSL-900CIII</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">ﾘﾐｯﾄｹｰﾌﾞﾙ配線修理費</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0;">1</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+                <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+              </tr>
+            </table>
+            <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);background:#1565c0;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;z-index:5;">&#9314; 中央ペイン（下）</div>
+          </div>
+        </div>
+
+        <!-- 右ペイン -->
+        <div style="width:160px; background:#fff; border-left:1px solid #e0e0e0; flex-shrink:0; position:relative;">
+          <div style="padding:4px 8px; font-size:10px; color:#888; border-bottom:1px solid #e0e0e0; background:#fafafa; display:flex; align-items:center; justify-content:space-between;">
+            <span>PDFプレビュー</span>
+            <div style="display:flex; gap:2px;">
+              <span style="width:18px;height:18px;border:1px solid #ccc;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;">&minus;</span>
+              <span style="font-size:9px;color:#555;line-height:18px;">100%</span>
+              <span style="width:18px;height:18px;border:1px solid #ccc;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#555;">+</span>
+            </div>
+          </div>
+          <div style="padding:20px; text-align:center;">
+            <div style="background:#f9f9f9; border:1px solid #e0e0e0; border-radius:4px; padding:20px 10px; font-size:10px; color:#888;">
+              <div style="font-size:20px; margin-bottom:6px;">&#128196;</div>
+              納品書PDF<br>プレビュー表示
+            </div>
+          </div>
+          <div style="position:absolute;top:36px;left:50%;transform:translateX(-50%);background:#1565c0;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;z-index:5;">&#9315; 右ペイン</div>
+        </div>
+      </div>
     </div>
+    <div class="mock-caption">データ管理画面の全体レイアウト</div>
 
-    <table>
+    <table class="doc-table">
       <tr><th>エリア</th><th>役割</th></tr>
-      <tr><td><strong>ナビバー</strong></td><td>画面切替、PDF取込ボタン、Excel出力ボタン</td></tr>
-      <tr><td><strong>左ペイン</strong></td><td>ファイル検索・フィルタ・ファイル一覧</td></tr>
-      <tr><td><strong>中央ペイン（上）</strong></td><td>選択したファイルのヘッダー情報（日時、取引先、作業所など）</td></tr>
-      <tr><td><strong>中央ペイン（下）</strong></td><td>明細テーブル（品目・数量・金額など）</td></tr>
-      <tr><td><strong>右ペイン</strong></td><td>元のPDFプレビュー</td></tr>
+      <tr><td><strong>&#9312; 左ペイン</strong></td><td>ファイル検索・フィルタ・ファイル一覧。クリックしてファイルを選択</td></tr>
+      <tr><td><strong>&#9313; 中央ペイン（上）</strong></td><td>選択したファイルのヘッダー情報（日時、取引先、作業所など）</td></tr>
+      <tr><td><strong>&#9314; 中央ペイン（下）</strong></td><td>明細テーブル（品目・数量・金額など）</td></tr>
+      <tr><td><strong>&#9315; 右ペイン</strong></td><td>元のPDFプレビュー（ズーム・パン操作可能）</td></tr>
     </table>
 
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: データ管理画面（データ選択済み）</div>
-        <div class="hint">左ペインでファイルを選択し、中央にヘッダー・明細、右にPDFが表示された状態</div>
-      </div>
-      <div class="caption">データ管理画面 — ファイル選択後の3ペイン表示</div>
+    <div class="tip">
+      <strong>ポイント:</strong> 各ペインの境界線をドラッグすると、エリアのサイズを自由に調整できます。
     </div>
 
     <h3>ダッシュボード画面</h3>
     <p>ナビバーの「<strong>ダッシュボード</strong>」をクリックすると、グラフ・集計画面に切り替わります。詳しくは<a href="#dashboard">9章</a>をご覧ください。</p>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 3. PDF取込 -->
+  <!-- ============================================================ -->
   <div class="section" id="import">
     <h2>3. PDF取込（納品書の登録）</h2>
     <p>納品書PDFをアップロードすると、<strong>AIが自動で内容を読み取りデータ化</strong>します。これがアプリの最も重要な機能です。</p>
 
     <h3>手順</h3>
-    <ol class="step-list">
-      <li>ナビバー右側の「<strong>PDF取込</strong>」ボタンをクリック
-        <div class="screenshot-placeholder" style="margin-top:12px;">
-          <div class="placeholder-box" style="min-height:80px; padding:16px;">
-            <div class="label">キャプチャ: ナビバー右側の「PDF取込」ボタン</div>
+    <ol>
+      <li>
+        <p>ナビバー右側の「<strong>PDF取込</strong>」ボタンをクリック</p>
+        <!-- モック: ナビバーのPDF取込ボタン強調 -->
+        <div class="mock-frame" style="margin:12px 0;">
+          <div style="background:#1565c0;color:#fff;display:flex;align-items:center;padding:0 16px;height:42px;gap:10px;font-size:13px;">
+            <span style="font-size:15px; font-weight:600; margin-right:20px;">納品書管理</span>
+            <span style="color:rgba(255,255,255,0.75);padding:5px 10px;border-radius:4px;font-size:12px;background:rgba(255,255,255,0.2);">データ管理</span>
+            <span style="color:rgba(255,255,255,0.75);padding:5px 10px;font-size:12px;">ダッシュボード</span>
+            <span style="flex:1;"></span>
+            <span style="background:#ff9800;color:#fff;border:2px solid #fff;padding:5px 14px;border-radius:4px;font-size:12px;font-weight:600;box-shadow:0 0 8px rgba(255,152,0,0.5);">PDF取込 &larr; ここをクリック</span>
+            <span style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:4px 12px;border-radius:4px;font-size:12px;">Excel出力</span>
           </div>
         </div>
       </li>
       <li>ファイル選択ダイアログが開くので、納品書の<strong>PDFファイル</strong>を選択（複数選択可）</li>
-      <li>自動的に以下の処理が実行されます:
-        <ul>
-          <li>PDFが Google Drive の指定フォルダにアップロード</li>
-          <li>Gemini AI がPDFの内容を解析</li>
-          <li>日時・取引先・作業所・明細などのデータを自動抽出</li>
-          <li>データベースに保存</li>
-        </ul>
-        <div class="screenshot-placeholder" style="margin-top:12px;">
-          <div class="placeholder-box" style="min-height:100px; padding:16px;">
-            <div class="label">キャプチャ: PDF取込中の処理画面</div>
-            <div class="hint">プログレスバーや処理状況のメッセージが表示されている状態</div>
+      <li>
+        <p>自動的に処理が実行され、進捗が表示されます</p>
+        <!-- モック: ローディング画面 -->
+        <div class="mock-frame" style="margin:12px 0;">
+          <div class="mock-navbar">
+            <span class="m-title">納品書管理</span>
+            <span class="m-tab active">データ管理</span>
+            <span class="m-tab">ダッシュボード</span>
+          </div>
+          <div style="height:180px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.08); position:relative;">
+            <div style="background:#fff; padding:24px 36px; border-radius:8px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.12);">
+              <div style="width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#1565c0;border-radius:50%;margin:0 auto 10px;animation:spin 0.7s linear infinite;"></div>
+              <div style="font-size:13px; color:#555;">PDF処理中... (1/3)</div>
+            </div>
           </div>
         </div>
+        <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
       </li>
-      <li>処理が完了すると、左ペインのファイル一覧に新しいファイルが表示されます</li>
+      <li>処理が完了すると、左ペインのファイル一覧に新しいファイルが追加されます</li>
     </ol>
 
     <div class="tip">
       <strong>ポイント:</strong> PDFファイルの命名規則に従ってファイル名をつけると、取引先名と機種が自動で抽出されます（<a href="#naming">10章参照</a>）。
     </div>
-
     <div class="note">
       <strong>注意:</strong> 処理時間の制限があるため、大量のPDFを一度に取り込む場合は<strong>少しずつ</strong>（5件程度ずつ）アップロードしてください。
     </div>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 4. データの検索・フィルタ -->
+  <!-- ============================================================ -->
   <div class="section" id="search">
     <h2>4. データの検索・フィルタ</h2>
     <p>左ペインでファイルの絞り込みができます。複数のフィルタを組み合わせて使うこともできます。</p>
 
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: 左ペインの検索・フィルタエリア</div>
-        <div class="hint">検索ボックス、ステータスボタン、日付範囲、取引先ドロップダウンが表示された状態</div>
+    <!-- モック: 左ペイン拡大 -->
+    <div class="mock-frame" style="max-width:340px;">
+      <div style="background:#fff; padding:12px;">
+        <!-- 検索 -->
+        <div style="position:relative;">
+          <div style="padding:7px 10px; border:1px solid #1565c0; border-radius:4px; font-size:12px; color:#333; background:#fff;">ニッセツ</div>
+          <div style="position:absolute;top:-8px;right:8px;background:#ff5722;color:#fff;font-size:9px;padding:1px 6px;border-radius:6px;">&#9312; テキスト検索</div>
+        </div>
+
+        <!-- 日付 -->
+        <div style="display:flex; gap:4px; margin-top:10px; position:relative;">
+          <div style="flex:1;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;color:#333;">2026-01-01</div>
+          <span style="font-size:11px; color:#888; line-height:28px;">〜</span>
+          <div style="flex:1;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;color:#333;">2026-03-31</div>
+          <div style="position:absolute;top:-8px;right:8px;background:#ff5722;color:#fff;font-size:9px;padding:1px 6px;border-radius:6px;">&#9314; 日付範囲</div>
+        </div>
+
+        <!-- 取引先 -->
+        <div style="margin-top:10px; position:relative;">
+          <div style="padding:6px 8px; border:1px solid #ddd; border-radius:4px; font-size:11px; color:#333;">取引先：ニッセツ ▾</div>
+          <div style="position:absolute;top:-8px;right:8px;background:#ff5722;color:#fff;font-size:9px;padding:1px 6px;border-radius:6px;">&#9315; 取引先</div>
+        </div>
+
+        <!-- ステータス -->
+        <div style="display:flex; gap:4px; margin-top:10px; position:relative;">
+          <div style="flex:1;padding:5px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;color:#555;">全て</div>
+          <div style="flex:1;padding:5px;border:1px solid #1565c0;background:#1565c0;color:#fff;border-radius:4px;font-size:11px;text-align:center;">完了</div>
+          <div style="flex:1;padding:5px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:center;color:#555;">未処理</div>
+          <div style="position:absolute;top:-8px;right:8px;background:#ff5722;color:#fff;font-size:9px;padding:1px 6px;border-radius:6px;">&#9313; ステータス</div>
+        </div>
+
+        <div style="border-top:1px solid #e0e0e0; margin-top:12px; padding-top:8px;">
+          <div style="padding:7px 8px; background:#e3f2fd; border-left:3px solid #1565c0; border-bottom:1px solid #f0f0f0; border-radius:0 4px 4px 0;">
+            <div style="font-size:11px; font-weight:500;">ニッセツ_関根工務店_HSL-900CIII_月例.pdf</div>
+            <div style="font-size:10px; color:#888; margin-top:2px;">ニッセツ <span style="background:#e8f5e9;color:#2e7d32;font-size:9px;padding:1px 5px;border-radius:6px;">完了</span></div>
+          </div>
+        </div>
       </div>
-      <div class="caption">左ペインのフィルタエリア</div>
     </div>
+    <div class="mock-caption">左ペインのフィルタ機能（各番号の説明は下記参照）</div>
 
-    <h3>テキスト検索</h3>
-    <ul>
-      <li>左上の<strong>検索ボックス</strong>にキーワードを入力</li>
-      <li>ファイル名・取引先名・作業所名で部分一致検索されます</li>
-    </ul>
-
-    <h3>ステータスフィルタ</h3>
-    <ul>
-      <li>「<strong>全て</strong>」「<strong>完了</strong>」「<strong>未処理</strong>」ボタンで切り替え</li>
-      <li>完了: <span class="badge badge-green">完了</span> &mdash; 確認済みのデータ</li>
-      <li>未処理: <span class="badge badge-orange">未処理</span> &mdash; まだ確認されていないデータ</li>
-    </ul>
-
-    <h3>日付範囲フィルタ</h3>
-    <ul>
-      <li>「開始日」〜「終了日」を指定して、該当期間のデータに絞り込み</li>
-    </ul>
-
-    <h3>取引先ドロップダウン</h3>
-    <ul>
-      <li>登録済みの取引先一覧から選択してフィルタリング</li>
-    </ul>
+    <table class="doc-table">
+      <tr><th>#</th><th>機能</th><th>説明</th></tr>
+      <tr><td>&#9312;</td><td><strong>テキスト検索</strong></td><td>ファイル名・取引先名・作業所名で部分一致検索</td></tr>
+      <tr><td>&#9313;</td><td><strong>ステータスフィルタ</strong></td><td>「全て」「<span class="badge badge-green">完了</span>」「<span class="badge badge-orange">未処理</span>」で切替</td></tr>
+      <tr><td>&#9314;</td><td><strong>日付範囲フィルタ</strong></td><td>開始日〜終了日を指定して期間絞り込み</td></tr>
+      <tr><td>&#9315;</td><td><strong>取引先ドロップダウン</strong></td><td>登録済みの取引先一覧から選択</td></tr>
+    </table>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 5. データの閲覧・編集 -->
+  <!-- ============================================================ -->
   <div class="section" id="edit">
     <h2>5. データの閲覧・編集</h2>
 
     <h3>データの閲覧</h3>
-    <ol class="step-list">
-      <li>左ペインのファイル一覧から、確認したいファイルを<strong>クリック</strong></li>
-      <li>中央ペイン上部に<strong>ヘッダー情報</strong>（日時、納品書No、取引先、作業所など）が表示されます</li>
-      <li>中央ペイン下部に<strong>明細テーブル</strong>（品目・数量・単価・金額など）が表示されます</li>
-      <li>右ペインに元の<strong>PDFプレビュー</strong>が表示されます</li>
-    </ol>
-
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: ヘッダー情報と明細テーブルの閲覧画面</div>
-        <div class="hint">中央ペインにヘッダー情報と明細テーブルが表示された状態</div>
-      </div>
-      <div class="caption">ファイル選択後の閲覧画面</div>
-    </div>
+    <p>左ペインのファイル一覧から確認したいファイルを<strong>クリック</strong>すると、中央ペインにデータが表示されます。</p>
 
     <h3>データの編集</h3>
-    <ol class="step-list">
-      <li>中央ペインの「<strong>編集</strong>」ボタンをクリック &rarr; 編集モードに切り替わります</li>
+    <ol>
+      <li>中央ペイン上部の「<strong>編集</strong>」ボタンをクリック &rarr; 編集モードに切り替わります</li>
       <li>ヘッダー情報のフォーム、明細テーブルのセルが<strong>編集可能</strong>になります</li>
-      <li>変更したセルは<strong style="background:#fffde7;padding:2px 4px;border:1px solid #f9a825;border-radius:2px;">黄色でハイライト</strong>されるので、どこを変更したか一目でわかります</li>
+      <li>変更したセルは<strong style="background:#fffde7;padding:2px 4px;border:1px solid #f9a825;border-radius:2px;">黄色でハイライト</strong>されます</li>
       <li>日時・請求計上日は<strong>カレンダーピッカー</strong>で日付を選択できます</li>
       <li>編集が完了したら「<strong>保存</strong>」ボタンをクリック</li>
     </ol>
 
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: 編集モードの画面</div>
-        <div class="hint">フォームが編集可能になり、変更箇所が黄色ハイライトされた状態。「保存」「キャンセル」「削除」ボタンが見える状態</div>
+    <!-- モック: 閲覧モード vs 編集モード -->
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      <!-- 閲覧モード -->
+      <div style="flex:1; min-width:300px;">
+        <div class="mock-frame">
+          <div style="background:#fff; padding:12px;">
+            <div style="font-size:12px; font-weight:600; color:#1565c0; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+              ヘッダー情報
+              <div style="display:flex; gap:4px;">
+                <span style="padding:3px 10px; background:#1565c0; color:#fff; border-radius:3px; font-size:10px;">編集</span>
+                <span style="padding:3px 10px; border:1px solid #c62828; color:#c62828; border-radius:3px; font-size:10px;">削除</span>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+              <div><div style="font-size:9px;color:#888;">日時</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f0f0f0;color:#666;">2026/03/14</div></div>
+              <div><div style="font-size:9px;color:#888;">納品書No</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f0f0f0;color:#666;">107082</div></div>
+              <div><div style="font-size:9px;color:#888;">取引先</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f0f0f0;color:#666;">ニッセツ</div></div>
+              <div><div style="font-size:9px;color:#888;">作業所</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#f0f0f0;color:#666;">関根工務店</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">閲覧モード（グレー背景・読み取り専用）</div>
       </div>
-      <div class="caption">編集モード — 変更箇所が黄色くハイライトされます</div>
+      <!-- 編集モード -->
+      <div style="flex:1; min-width:300px;">
+        <div class="mock-frame" style="border-color:#ff9800;">
+          <div style="background:#fff; padding:12px;">
+            <div style="font-size:12px; font-weight:600; color:#1565c0; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+              ヘッダー情報
+              <div style="display:flex; gap:4px;">
+                <span style="padding:3px 10px; background:#1565c0; color:#fff; border-radius:3px; font-size:10px;">保存</span>
+                <span style="padding:3px 10px; border:1px solid #ccc; color:#555; border-radius:3px; font-size:10px;">キャンセル</span>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+              <div><div style="font-size:9px;color:#888;">日時</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#fff;">2026/03/14</div></div>
+              <div><div style="font-size:9px;color:#888;">納品書No</div><div style="padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-size:11px;background:#fff;">107082</div></div>
+              <div><div style="font-size:9px;color:#888;">取引先</div><div style="padding:4px 6px;border:1px solid #f9a825;border-radius:3px;font-size:11px;background:#fffde7;">ニッセツ工業</div></div>
+              <div><div style="font-size:9px;color:#888;">作業所</div><div style="padding:4px 6px;border:1px solid #f9a825;border-radius:3px;font-size:11px;background:#fffde7;">関根工務店 第2関根</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-caption">編集モード（変更箇所が黄色ハイライト）</div>
+      </div>
     </div>
 
     <div class="tip">
@@ -323,38 +522,69 @@
 
     <h3>ファイル単位の一括削除</h3>
     <ul>
-      <li>編集モード中に「<strong>削除</strong>」ボタンをクリックすると、そのファイルに紐づく全データを削除できます</li>
+      <li>「<strong>削除</strong>」ボタンをクリックすると、そのファイルに紐づく全データを削除できます</li>
     </ul>
     <div class="note">
       <strong>注意:</strong> 削除したデータは元に戻せません。削除前に確認ダイアログが表示されますので、よく確認してください。
     </div>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 6. 明細行の操作 -->
+  <!-- ============================================================ -->
   <div class="section" id="detail">
     <h2>6. 明細行の操作</h2>
     <p>中央ペイン下部の明細テーブルでは、個別の明細行を操作できます。<strong>編集モード</strong>時のみ操作可能です。</p>
 
-    <h3>明細行の編集</h3>
-    <ul>
-      <li>各セルを直接クリックして値を変更できます</li>
-      <li>区分（販売/レンタル）、機種、型式、数量、単価、金額など全項目が編集可能です</li>
-    </ul>
-
-    <h3>明細行の削除</h3>
-    <ul>
-      <li>各行の左端に<strong style="color:#c62828;">x（削除）ボタン</strong>が表示されます</li>
-      <li>クリックすると、その明細行が削除されます</li>
-    </ul>
-
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: 明細テーブルの編集モード</div>
-        <div class="hint">行の左端に削除ボタン（x）が見える状態。セル編集中の様子</div>
+    <!-- モック: 明細テーブル編集モード -->
+    <div class="mock-frame">
+      <div style="background:#fafafa; padding:12px;">
+        <div style="font-size:12px; font-weight:600; color:#1565c0; margin-bottom:8px;">明細データ (3件) &mdash; 編集モード</div>
+        <table style="border-collapse:collapse; font-size:11px; width:100%;">
+          <tr style="background:#f5f5f5;">
+            <th style="padding:5px 4px; border:1px solid #e0e0e0; width:28px; font-weight:500; color:#555;"></th>
+            <th style="padding:5px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">区分</th>
+            <th style="padding:5px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">機種</th>
+            <th style="padding:5px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">型式</th>
+            <th style="padding:5px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">数量</th>
+            <th style="padding:5px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">単価</th>
+            <th style="padding:5px 6px; border:1px solid #e0e0e0; font-weight:500; color:#555;">金額</th>
+          </tr>
+          <tr>
+            <td style="padding:2px; border:1px solid #e0e0e0; text-align:center;"><span style="color:#c62828; font-size:16px; font-weight:700; cursor:pointer;">&times;</span></td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">レンタル</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">HSL-900CIII</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">月例点検費</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">1</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+          </tr>
+          <tr>
+            <td style="padding:2px; border:1px solid #e0e0e0; text-align:center;"><span style="color:#c62828; font-size:16px; font-weight:700; cursor:pointer;">&times;</span></td>
+            <td style="padding:4px 6px; border:1px solid #f9a825; background:#fffde7;">販売</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">HSL-900CIII</td>
+            <td style="padding:4px 6px; border:1px solid #f9a825; background:#fffde7;">ﾘﾐｯﾄｹｰﾌﾞﾙ配線修理費</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">1</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+          </tr>
+          <tr>
+            <td style="padding:2px; border:1px solid #e0e0e0; text-align:center;"><span style="color:#c62828; font-size:16px; font-weight:700; cursor:pointer;">&times;</span></td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">レンタル</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">KPC-900SII</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">月例点検費</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0;">1</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+            <td style="padding:4px 6px; border:1px solid #e0e0e0; text-align:right;">20,000</td>
+          </tr>
+        </table>
+        <div style="margin-top:10px; display:flex; gap:16px; font-size:11px; color:#666;">
+          <span>&#9888; <span style="color:#c62828;font-weight:600;">&times;</span> = 行削除ボタン</span>
+          <span>&#9888; <span style="background:#fffde7;border:1px solid #f9a825;padding:1px 6px;border-radius:2px;">黄色</span> = 変更済みセル</span>
+        </div>
       </div>
-      <div class="caption">明細テーブルの編集モード — 各行に削除ボタンが表示されます</div>
     </div>
+    <div class="mock-caption">編集モード時の明細テーブル &mdash; 左端の &times; で行削除、変更セルは黄色ハイライト</div>
 
     <h3>列幅の調整</h3>
     <ul>
@@ -363,28 +593,55 @@
     </ul>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 7. PDFプレビュー -->
+  <!-- ============================================================ -->
   <div class="section" id="preview">
     <h2>7. PDFプレビュー</h2>
     <p>右ペインに元のPDFを表示して、AIが読み取ったデータと<strong>照合確認</strong>ができます。</p>
 
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: PDFプレビュー（右ペイン）</div>
-        <div class="hint">PDFが表示され、上部にズーム・パンのコントロールボタンが並んでいる状態</div>
+    <!-- モック: PDFプレビューコントロール -->
+    <div class="mock-frame" style="max-width:400px;">
+      <div style="padding:6px 12px; font-size:11px; color:#888; border-bottom:1px solid #e0e0e0; background:#fafafa; display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-weight:500;">PDFプレビュー</span>
+        <div style="display:flex; gap:3px; align-items:center;">
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#555;background:#fff;">&#8592;</span>
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#555;background:#fff;">&#8593;</span>
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#555;background:#fff;">&#8595;</span>
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#555;background:#fff;">&#8594;</span>
+          <span style="width:4px;"></span>
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;background:#fff;">&minus;</span>
+          <span style="font-size:11px;color:#555;min-width:32px;text-align:center;font-weight:500;">120%</span>
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#555;background:#fff;">+</span>
+          <span style="width:4px;"></span>
+          <span style="width:26px;height:26px;border:1px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#555;background:#fff;">&#8634;</span>
+        </div>
       </div>
-      <div class="caption">PDFプレビューエリア — ズーム・パン操作で細部を確認できます</div>
+      <div style="height:200px; background:#f9f9f9; display:flex; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border:1px solid #ddd; border-radius:4px; padding:16px; width:80%; text-align:center;">
+          <div style="font-size:10px; color:#888; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+            <strong style="font-size:13px; color:#333;">納 品 書</strong><br>
+            No. 107082
+          </div>
+          <div style="font-size:10px; color:#888; text-align:left;">
+            <div>日付: 2026年3月14日</div>
+            <div>取引先: ニッセツ 様</div>
+            <div style="margin-top:6px; border-top:1px solid #eee; padding-top:4px;">
+              HSL-900CIII 月例点検費 ... &#165;20,000
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="mock-caption">PDFプレビュー &mdash; 上部のボタンで表示位置・倍率を調整</div>
 
-    <h3>操作コントロール</h3>
-    <table>
+    <table class="doc-table">
       <tr><th>ボタン</th><th>機能</th></tr>
-      <tr><td><strong>&larr; &rarr; &uarr; &darr;</strong></td><td>パン移動（PDFの表示位置を移動）</td></tr>
+      <tr><td><strong>&larr; &uarr; &darr; &rarr;</strong></td><td>パン移動（PDFの表示位置を上下左右に移動）</td></tr>
       <tr><td><strong>&minus;</strong></td><td>ズームアウト（縮小）</td></tr>
-      <tr><td><strong>%</strong> 表示</td><td>現在のズーム倍率を表示</td></tr>
+      <tr><td><strong>%表示</strong></td><td>現在のズーム倍率</td></tr>
       <tr><td><strong>+</strong></td><td>ズームイン（拡大）</td></tr>
-      <tr><td><strong>&#8634;</strong></td><td>表示をリセット（初期位置・倍率に戻す）</td></tr>
+      <tr><td><strong>&#8634;</strong></td><td>リセット（初期位置・倍率に戻す）</td></tr>
     </table>
 
     <div class="tip">
@@ -392,29 +649,36 @@
     </div>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 8. Excel出力 -->
+  <!-- ============================================================ -->
   <div class="section" id="excel">
     <h2>8. Excel出力</h2>
     <p>登録データをExcelファイルとしてダウンロードできます。</p>
 
     <h3>手順</h3>
-    <ol class="step-list">
+    <ol>
       <li>ナビバー右側の「<strong>Excel出力</strong>」ボタンをクリック</li>
       <li>データが<strong>.xlsx形式</strong>でエクスポートされます</li>
       <li><strong>ダウンロードURL</strong>が表示されるので、クリックしてファイルをダウンロード</li>
     </ol>
 
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: Excel出力のダウンロードリンク表示</div>
-        <div class="hint">「Excel出力」ボタン押下後に表示されるダウンロードリンクの画面</div>
+    <!-- モック: Excel出力ボタン -->
+    <div class="mock-frame" style="margin:12px 0;">
+      <div style="background:#1565c0;color:#fff;display:flex;align-items:center;padding:0 16px;height:42px;gap:10px;font-size:13px;">
+        <span style="font-size:15px; font-weight:600; margin-right:20px;">納品書管理</span>
+        <span style="color:rgba(255,255,255,0.75);padding:5px 10px;border-radius:4px;font-size:12px;background:rgba(255,255,255,0.2);">データ管理</span>
+        <span style="color:rgba(255,255,255,0.75);padding:5px 10px;font-size:12px;">ダッシュボード</span>
+        <span style="flex:1;"></span>
+        <span style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:4px 12px;border-radius:4px;font-size:12px;">PDF取込</span>
+        <span style="background:#ff9800;color:#fff;border:2px solid #fff;padding:5px 14px;border-radius:4px;font-size:12px;font-weight:600;box-shadow:0 0 8px rgba(255,152,0,0.5);">Excel出力 &larr; ここをクリック</span>
       </div>
-      <div class="caption">Excel出力後のダウンロードリンク</div>
     </div>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 9. ダッシュボード -->
+  <!-- ============================================================ -->
   <div class="section" id="dashboard">
     <h2>9. ダッシュボード（集計・グラフ）</h2>
     <p>登録データを<strong>グラフや集計表</strong>で視覚的に確認できます。</p>
@@ -422,17 +686,96 @@
     <h3>アクセス方法</h3>
     <p>ナビバーの「<strong>ダッシュボード</strong>」タブをクリックして切り替えます。</p>
 
-    <div class="screenshot-placeholder">
-      <div class="placeholder-box">
-        <div class="icon">&#128247;</div>
-        <div class="label">キャプチャ: ダッシュボード画面の全体</div>
-        <div class="hint">4つのグラフ（月別金額推移・取引先別集計・機種別集計・明細サマリー）が表示された状態</div>
+    <!-- モック: ダッシュボード画面 -->
+    <div class="mock-frame">
+      <div style="background:#1565c0;color:#fff;display:flex;align-items:center;padding:0 16px;height:42px;gap:10px;font-size:13px;">
+        <span style="font-size:15px; font-weight:600; margin-right:20px;">納品書管理</span>
+        <span style="color:rgba(255,255,255,0.75);padding:5px 10px;font-size:12px;">データ管理</span>
+        <span style="padding:5px 10px;border-radius:4px;font-size:12px;background:rgba(255,255,255,0.2);color:#fff;">ダッシュボード</span>
       </div>
-      <div class="caption">ダッシュボード画面 — グラフと集計表で全体を把握できます</div>
+      <!-- フィルタバー -->
+      <div style="background:#fff; padding:10px 16px; border-bottom:1px solid #e0e0e0; display:flex; align-items:center; gap:8px; font-size:12px;">
+        <span style="color:#555; font-weight:500;">期間:</span>
+        <div style="padding:4px 8px; border:1px solid #ddd; border-radius:4px; font-size:11px; color:#333;">2026-01-01</div>
+        <span style="color:#888;">〜</span>
+        <div style="padding:4px 8px; border:1px solid #ddd; border-radius:4px; font-size:11px; color:#333;">2026-03-31</div>
+        <span style="padding:4px 12px; background:#1565c0; color:#fff; border-radius:4px; font-size:11px;">適用</span>
+        <span style="padding:4px 12px; border:1px solid #ccc; color:#555; border-radius:4px; font-size:11px;">リセット</span>
+      </div>
+      <!-- グラフグリッド -->
+      <div style="padding:16px; display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#f4f6f8;">
+        <!-- 月別金額推移 -->
+        <div style="background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.06); overflow:hidden;">
+          <div style="padding:8px 12px; font-size:12px; font-weight:600; color:#1565c0; border-bottom:1px solid #f0f0f0;">月別金額推移</div>
+          <div style="padding:12px; height:120px; display:flex; align-items:flex-end; gap:8px; justify-content:center;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div style="width:28px;height:40px;background:#42a5f5;border-radius:3px 3px 0 0;"></div>
+              <span style="font-size:8px;color:#888;">1月</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div style="width:28px;height:65px;background:#42a5f5;border-radius:3px 3px 0 0;"></div>
+              <span style="font-size:8px;color:#888;">2月</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div style="width:28px;height:90px;background:#1565c0;border-radius:3px 3px 0 0;"></div>
+              <span style="font-size:8px;color:#888;">3月</span>
+            </div>
+          </div>
+        </div>
+        <!-- 取引先別集計 -->
+        <div style="background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.06); overflow:hidden;">
+          <div style="padding:8px 12px; font-size:12px; font-weight:600; color:#1565c0; border-bottom:1px solid #f0f0f0;">取引先別集計</div>
+          <div style="padding:12px; height:120px; display:flex; align-items:center; justify-content:center;">
+            <div style="width:90px;height:90px;border-radius:50%;background:conic-gradient(#1565c0 0% 40%, #42a5f5 40% 65%, #90caf9 65% 85%, #bbdefb 85% 100%);position:relative;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:#fff;border-radius:50%;"></div>
+            </div>
+            <div style="margin-left:12px; font-size:9px; color:#555;">
+              <div><span style="display:inline-block;width:8px;height:8px;background:#1565c0;border-radius:2px;margin-right:3px;"></span>ニッセツ</div>
+              <div><span style="display:inline-block;width:8px;height:8px;background:#42a5f5;border-radius:2px;margin-right:3px;"></span>太陽建設</div>
+              <div><span style="display:inline-block;width:8px;height:8px;background:#90caf9;border-radius:2px;margin-right:3px;"></span>マサノ建装</div>
+              <div><span style="display:inline-block;width:8px;height:8px;background:#bbdefb;border-radius:2px;margin-right:3px;"></span>その他</div>
+            </div>
+          </div>
+        </div>
+        <!-- 機種別集計 -->
+        <div style="background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.06); overflow:hidden;">
+          <div style="padding:8px 12px; font-size:12px; font-weight:600; color:#1565c0; border-bottom:1px solid #f0f0f0;">機種別集計</div>
+          <div style="padding:12px 12px 12px 70px; height:120px; display:flex; flex-direction:column; justify-content:center; gap:8px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:9px;color:#555;width:60px;text-align:right;margin-left:-60px;">HSL-900CIII</span>
+              <div style="height:14px;width:80%;background:#1565c0;border-radius:0 3px 3px 0;"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:9px;color:#555;width:60px;text-align:right;margin-left:-60px;">KPC-900SII</span>
+              <div style="height:14px;width:50%;background:#42a5f5;border-radius:0 3px 3px 0;"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:9px;color:#555;width:60px;text-align:right;margin-left:-60px;">NSA-406</span>
+              <div style="height:14px;width:35%;background:#90caf9;border-radius:0 3px 3px 0;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- 明細サマリー -->
+        <div style="background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.06); overflow:hidden;">
+          <div style="padding:8px 12px; font-size:12px; font-weight:600; color:#1565c0; border-bottom:1px solid #f0f0f0;">明細サマリー</div>
+          <div style="padding:8px;">
+            <table style="border-collapse:collapse; font-size:10px; width:100%;">
+              <tr style="background:#f5f5f5;">
+                <th style="padding:4px 6px;border:1px solid #e0e0e0;text-align:left;font-weight:500;color:#555;">取引先</th>
+                <th style="padding:4px 6px;border:1px solid #e0e0e0;text-align:right;font-weight:500;color:#555;">金額</th>
+              </tr>
+              <tr><td style="padding:4px 6px;border:1px solid #e0e0e0;">ニッセツ</td><td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:right;">&#165;240,000</td></tr>
+              <tr><td style="padding:4px 6px;border:1px solid #e0e0e0;">太陽建設</td><td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:right;">&#165;156,650</td></tr>
+              <tr><td style="padding:4px 6px;border:1px solid #e0e0e0;">マサノ建装</td><td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:right;">&#165;55,000</td></tr>
+              <tr style="background:#e3f2fd; font-weight:600;"><td style="padding:4px 6px;border:1px solid #e0e0e0;">合計</td><td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:right;">&#165;451,650</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="mock-caption">ダッシュボード画面 &mdash; 4種類のグラフ・集計表で全体を把握</div>
 
-    <h3>表示されるグラフ（4種類）</h3>
-    <table>
+    <table class="doc-table">
       <tr><th>グラフ</th><th>種類</th><th>表示内容</th></tr>
       <tr><td><strong>月別金額推移</strong></td><td>縦棒グラフ</td><td>月ごとの合計金額の推移</td></tr>
       <tr><td><strong>取引先別集計</strong></td><td>円グラフ</td><td>取引先ごとの金額割合</td></tr>
@@ -448,7 +791,9 @@
     </ul>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 10. PDFファイル名の命名規則 -->
+  <!-- ============================================================ -->
   <div class="section" id="naming">
     <h2>10. PDFファイル名の命名規則</h2>
     <p>取引先名と機種は<strong>PDFファイル名から自動抽出</strong>されます。以下の命名規則に従うと正しく抽出されます。</p>
@@ -465,30 +810,37 @@
     </ul>
 
     <h3>抽出ルール</h3>
-    <table>
+    <table class="doc-table">
       <tr><th>項目</th><th>抽出位置</th></tr>
       <tr><td><strong>取引先</strong></td><td>最初の区切り文字の手前（先頭部分）</td></tr>
       <tr><td><strong>機種</strong></td><td>右から見て最初の区切りと次の区切りの間（後ろから2番目の要素）</td></tr>
     </table>
 
     <h3>例</h3>
-    <p>ファイル名: <code>AKｺｰﾎﾟﾚｰｼｮﾝ‗MOTHER4新築工事_JCL-015C_月例.pdf</code></p>
-    <ul>
-      <li><strong>取引先</strong> &rarr; <code>AKｺｰﾎﾟﾚｰｼｮﾝ</code></li>
-      <li><strong>機種</strong> &rarr; <code>JCL-015C</code></li>
-    </ul>
+    <!-- モック: ファイル名解析の図 -->
+    <div style="background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; padding:16px; margin:12px 0; text-align:center; font-family:'Consolas','Monaco',monospace;">
+      <div style="font-size:14px; margin-bottom:12px;">
+        <span style="background:#e3f2fd; border:2px solid #1565c0; padding:2px 6px; border-radius:4px; color:#0d47a1; font-weight:700;">AKｺｰﾎﾟﾚｰｼｮﾝ</span><span style="color:#c62828; font-weight:700; font-size:16px;">&#x2017;</span><span style="padding:2px 4px;">MOTHER4新築工事</span><span style="color:#c62828; font-weight:700; font-size:16px;">_</span><span style="background:#fff3e0; border:2px solid #ff9800; padding:2px 6px; border-radius:4px; color:#e65100; font-weight:700;">JCL-015C</span><span style="color:#c62828; font-weight:700; font-size:16px;">_</span><span style="padding:2px 4px;">月例.pdf</span>
+      </div>
+      <div style="display:flex; justify-content:center; gap:32px; font-size:12px; font-family:'Segoe UI','Hiragino Sans',sans-serif;">
+        <span><span style="display:inline-block;width:12px;height:12px;background:#e3f2fd;border:2px solid #1565c0;border-radius:2px;margin-right:4px;"></span><strong>取引先</strong> = AKｺｰﾎﾟﾚｰｼｮﾝ</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#fff3e0;border:2px solid #ff9800;border-radius:2px;margin-right:4px;"></span><strong>機種</strong> = JCL-015C</span>
+      </div>
+    </div>
 
     <div class="tip">
       <strong>ポイント:</strong> 命名規則に沿わないファイル名でも取込は可能ですが、取引先・機種が空欄になるため、手動での入力が必要になります。
     </div>
   </div>
 
+  <!-- ============================================================ -->
   <!-- 11. トラブルシューティング -->
+  <!-- ============================================================ -->
   <div class="section" id="troubleshooting">
     <h2>11. トラブルシューティング</h2>
 
     <h3>よくある問題と対処法</h3>
-    <table>
+    <table class="doc-table">
       <tr><th>症状</th><th>対処法</th></tr>
       <tr><td>アプリにアクセスできない</td><td>URLが正しいか確認してください。問題が続く場合は管理者にお問い合わせください</td></tr>
       <tr><td>PDF取込でエラーが出る</td><td>PDFファイルが破損していないか確認してください。問題が続く場合は管理者にお問い合わせください</td></tr>
@@ -497,7 +849,7 @@
       <tr><td>処理がタイムアウトする</td><td>PDFを1件ずつ、または少数ずつアップロードしてください</td></tr>
       <tr><td>取引先名・機種が空になる</td><td>PDFファイル名が命名規則に沿っているか確認してください（<a href="#naming">10章参照</a>）</td></tr>
       <tr><td>データが表示されない</td><td>画面を再読み込み（F5キー）してください。解決しない場合は管理者に報告してください</td></tr>
-      <tr><td>ダッシュボードが空白</td><td>データが登録されているか確認してください。日付フィルタが適用されている場合は「リセット」をクリックしてください</td></tr>
+      <tr><td>ダッシュボードが空白</td><td>データが登録されているか確認してください。日付フィルタが適用されている場合は「リセット」をクリック</td></tr>
     </table>
 
     <div class="note">
