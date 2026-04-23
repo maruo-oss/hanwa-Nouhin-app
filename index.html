@@ -106,11 +106,43 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-text { font-size: 14px; color: #555; }
 
+    /* モーダル共通オーバーレイ */
+    .duplicate-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1100; }
+
+    /* スキャン結果モーダル */
+    .scan-modal { background: #fff; width: 560px; max-width: 95%; max-height: 85vh; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column; }
+    .scan-header { padding: 14px 20px; border-bottom: 1px solid #eee; }
+    .scan-title { font-size: 17px; font-weight: 700; color: #1565c0; }
+    .scan-body { padding: 14px 20px; overflow-y: auto; flex: 1; }
+    .scan-summary { display: flex; gap: 8px; margin-bottom: 12px; }
+    .scan-stat { flex: 1; padding: 10px 6px; border-radius: 6px; text-align: center; background: #f5f5f5; }
+    .scan-stat-num { font-size: 20px; font-weight: 700; line-height: 1.2; }
+    .scan-stat-label { font-size: 11px; color: #666; margin-top: 3px; }
+    .scan-stat-ok .scan-stat-num { color: #2e7d32; }
+    .scan-stat-skip .scan-stat-num { color: #757575; }
+    .scan-stat-warn .scan-stat-num { color: #ef6c00; }
+    .scan-stat-err .scan-stat-num { color: #c62828; }
+    .scan-section-title { font-weight: 600; margin: 14px 0 6px; font-size: 13px; color: #333; }
+    .scan-conflicts-list { border: 1px solid #eee; border-radius: 6px; max-height: 240px; overflow-y: auto; }
+    .scan-conflict-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+    .scan-conflict-item:last-child { border-bottom: none; }
+    .scan-conflict-item input { margin-top: 3px; }
+    .scan-conflict-info { flex: 1; font-size: 13px; }
+    .scan-conflict-no { font-weight: 700; color: #bf360c; }
+    .scan-conflict-files { font-size: 12px; color: #555; margin-top: 3px; line-height: 1.5; word-break: break-all; }
+    .scan-note { font-size: 12px; color: #555; margin-top: 8px; padding: 6px 10px; background: #fafafa; border-left: 3px solid #ef6c00; }
+    .scan-errors-list { border: 1px solid #ffcdd2; background: #ffebee; border-radius: 6px; padding: 6px 10px; }
+    .scan-error-item { font-size: 12px; color: #b71c1c; margin: 3px 0; word-break: break-all; }
+    .scan-timeout-note { margin-top: 10px; padding: 8px 10px; background: #fff3e0; border-left: 3px solid #ef6c00; font-size: 12px; color: #bf360c; border-radius: 4px; }
+    .scan-actions { padding: 10px 20px; border-top: 1px solid #eee; display: flex; gap: 8px; justify-content: flex-end; }
+    .scan-btn { padding: 8px 18px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .scan-btn-primary { background: #ef6c00; color: #fff; }
+    .scan-btn-primary:hover { background: #e65100; }
+    .scan-btn-secondary { background: #e0e0e0; color: #333; }
+    .scan-btn-secondary:hover { background: #bdbdbd; }
+
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #aaa; }
     .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-
-    /* 隠しinput */
-    #pdfInput { display: none; }
   </style>
 </head>
 <body>
@@ -121,9 +153,9 @@
   <a class="nav-link active" href="#" onclick="return false;">データ管理</a>
   <a class="nav-link" id="dashLink" href="#" target="_top">ダッシュボード</a>
   <span class="nav-spacer"></span>
-  <button class="nav-btn" id="btnUpload" onclick="document.getElementById('pdfInput').click()">PDF取込</button>
-  <button class="nav-btn" id="btnExport" onclick="exportExcel()">Excel出力</button>
-  <input type="file" id="pdfInput" accept=".pdf" onchange="handleFileUpload(this)">
+  <button class="nav-btn" id="btnOpenInbox" onclick="openInboxFolder()">📂 PDFを入れる</button>
+  <button class="nav-btn" id="btnScan" onclick="scanDriveInbox()">🔄 PDFを読み込む</button>
+  <button class="nav-btn" id="btnExport" onclick="exportExcel()">📊 Excel出力</button>
 </nav>
 
 <!-- メイン3ペインレイアウト -->
@@ -199,6 +231,51 @@
   <div class="loading-box">
     <div class="spinner"></div>
     <div class="loading-text" id="loadingText">処理中...</div>
+  </div>
+</div>
+
+<!-- Drive取込結果モーダル -->
+<div class="duplicate-overlay" id="scanResultOverlay" style="display:none;">
+  <div class="scan-modal">
+    <div class="scan-header">
+      <div class="scan-title">Drive取込結果</div>
+    </div>
+    <div class="scan-body">
+      <div class="scan-summary">
+        <div class="scan-stat scan-stat-ok">
+          <div class="scan-stat-num" id="scanProcessed">0</div>
+          <div class="scan-stat-label">新規</div>
+        </div>
+        <div class="scan-stat scan-stat-skip">
+          <div class="scan-stat-num" id="scanDupSkipped">0</div>
+          <div class="scan-stat-label">重複スキップ</div>
+        </div>
+        <div class="scan-stat scan-stat-warn">
+          <div class="scan-stat-num" id="scanConflicts">0</div>
+          <div class="scan-stat-label">要確認</div>
+        </div>
+        <div class="scan-stat scan-stat-err">
+          <div class="scan-stat-num" id="scanErrorCount">0</div>
+          <div class="scan-stat-label">エラー</div>
+        </div>
+      </div>
+      <div id="scanConflictsSection" style="display:none;">
+        <div class="scan-section-title">⚠ 同じNoで内容に差分あり（選択で上書き）</div>
+        <div id="scanConflictsList" class="scan-conflicts-list"></div>
+        <div class="scan-note">チェックしたものを「選択分を上書き」で置換します。既存のシート行と旧PDFは削除されます。</div>
+      </div>
+      <div id="scanErrorsSection" style="display:none;">
+        <div class="scan-section-title">❌ 処理エラー</div>
+        <div id="scanErrorsList" class="scan-errors-list"></div>
+      </div>
+      <div id="scanTimedOutNote" style="display:none;" class="scan-timeout-note">
+        ⏱ 実行時間上限に達したため途中で中断しました。残りのPDFは未処理フォルダに残っています。もう一度「Driveを読み込む」を押してください。
+      </div>
+    </div>
+    <div class="scan-actions">
+      <button type="button" class="scan-btn scan-btn-secondary" onclick="closeScanResult()">閉じる</button>
+      <button type="button" class="scan-btn scan-btn-primary" id="scanOverwriteBtn" onclick="bulkConfirmOverwrite()" style="display:none;">選択分を上書き</button>
+    </div>
   </div>
 </div>
 
@@ -543,39 +620,132 @@ function pvApply() {
 }
 
 // ============================================================
-// PDFアップロード
+// Drive 一括取込
 // ============================================================
-function handleFileUpload(input) {
-  var file = input.files[0];
-  if (!file) return;
-  if (file.type !== 'application/pdf') {
-    alert('PDFファイルを選択してください');
-    input.value = '';
-    return;
+var pendingScanResult = null;
+
+function openInboxFolder() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.success && result.url) {
+        window.open(result.url, '_blank');
+      } else {
+        alert('フォルダを開けません: ' + (result && result.error ? result.error : '不明なエラー'));
+      }
+    })
+    .withFailureHandler(function(err) {
+      alert('エラー: ' + err.message);
+    })
+    .getInboxFolderUrl();
+}
+
+function scanDriveInbox() {
+  showLoading('Drive取込中...（件数が多いと数分かかります）');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      hideLoading();
+      if (!result || !result.success) {
+        alert('取込エラー: ' + (result && result.error ? result.error : '不明なエラー'));
+        return;
+      }
+      loadData();
+      showScanResult(result);
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('取込エラー: ' + err.message);
+    })
+    .processInboxFolder();
+}
+
+function showScanResult(result) {
+  pendingScanResult = result;
+  var conflicts = result.pendingConflicts || [];
+  var errors = result.errors || [];
+
+  document.getElementById('scanProcessed').textContent = result.processed || 0;
+  document.getElementById('scanDupSkipped').textContent = result.duplicateSkipped || 0;
+  document.getElementById('scanConflicts').textContent = conflicts.length;
+  document.getElementById('scanErrorCount').textContent = errors.length;
+
+  var cSec = document.getElementById('scanConflictsSection');
+  var cList = document.getElementById('scanConflictsList');
+  var btn = document.getElementById('scanOverwriteBtn');
+  if (conflicts.length > 0) {
+    cSec.style.display = 'block';
+    btn.style.display = 'inline-block';
+    cList.innerHTML = conflicts.map(function(c, i) {
+      return '<label class="scan-conflict-item">' +
+        '<input type="checkbox" data-conflict-idx="' + i + '" checked>' +
+        '<div class="scan-conflict-info">' +
+          '<div class="scan-conflict-no">No: ' + escapeHtml(c.existingNo || '') + '</div>' +
+          '<div class="scan-conflict-files">' +
+            '新: ' + escapeHtml(c.pendingFileName || '') + '<br>' +
+            '既: ' + escapeHtml(c.existingFileName || '') + '（' + (c.existingFileCount || 0) + '行）' +
+          '</div>' +
+        '</div>' +
+      '</label>';
+    }).join('');
+  } else {
+    cSec.style.display = 'none';
+    btn.style.display = 'none';
   }
 
-  showLoading('PDF解析中...(1〜2分かかる場合があります)');
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var base64 = e.target.result.split(',')[1];
-    google.script.run
-      .withSuccessHandler(function(result) {
-        input.value = '';
-        if (result.success) {
-          loadData();
-        } else {
-          hideLoading();
-          alert('処理エラー: ' + result.error);
-        }
-      })
-      .withFailureHandler(function(err) {
-        hideLoading();
-        input.value = '';
-        alert('アップロードエラー: ' + err.message);
-      })
-      .uploadAndProcessPDF(base64, file.name);
-  };
-  reader.readAsDataURL(file);
+  var eSec = document.getElementById('scanErrorsSection');
+  var eList = document.getElementById('scanErrorsList');
+  if (errors.length > 0) {
+    eSec.style.display = 'block';
+    eList.innerHTML = errors.map(function(e) {
+      return '<div class="scan-error-item">' + escapeHtml(e.fileName || '') + ': ' + escapeHtml(e.error || '') + '</div>';
+    }).join('');
+  } else {
+    eSec.style.display = 'none';
+  }
+
+  document.getElementById('scanTimedOutNote').style.display = result.timedOut ? 'block' : 'none';
+  document.getElementById('scanResultOverlay').style.display = 'flex';
+}
+
+function closeScanResult() {
+  document.getElementById('scanResultOverlay').style.display = 'none';
+  pendingScanResult = null;
+}
+
+function bulkConfirmOverwrite() {
+  if (!pendingScanResult) return;
+  var boxes = document.querySelectorAll('#scanConflictsList input[type=checkbox]');
+  var selected = [];
+  for (var i = 0; i < boxes.length; i++) {
+    if (boxes[i].checked) {
+      var idx = Number(boxes[i].getAttribute('data-conflict-idx'));
+      selected.push(pendingScanResult.pendingConflicts[idx]);
+    }
+  }
+  if (selected.length === 0) {
+    alert('上書き対象が選択されていません');
+    return;
+  }
+  if (!confirm(selected.length + '件を最新で上書きします。よろしいですか？\n（既存のシート行と旧PDFは削除されます）')) return;
+
+  closeScanResult();
+  showLoading('上書き処理中...');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      hideLoading();
+      if (result && result.success) {
+        loadData();
+        var msg = result.overwritten + '件を上書きしました';
+        if (result.errors && result.errors.length) msg += ' / ' + result.errors.length + '件エラー';
+        alert(msg);
+      } else {
+        alert('上書きエラー: ' + (result && result.error ? result.error : '不明なエラー'));
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      alert('上書きエラー: ' + err.message);
+    })
+    .bulkOverwriteByNo(JSON.stringify(selected));
 }
 
 // ============================================================
