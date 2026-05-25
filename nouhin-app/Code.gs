@@ -7,7 +7,7 @@ const HEADERS = [
   'row_key', 'file_id', 'file_name', 'status',
   '日時', '納品書No', '取引先', '作業所', '貸出期間', '請求計上日', '伝票摘要',
   '区分', '機種', '号機', '型式', '管理No', '数量', '単位', '単価', '金額', '基本管理料', '備考',
-  'processed_at', 'item_order'
+  '取込日', 'processed_at', 'item_order'
 ];
 
 // --- プロパティ取得ヘルパー ---
@@ -26,8 +26,156 @@ function getSheet() {
     sheet = ss.insertSheet(SHEET_NAME);
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.setFrozenRows(1);
+  } else {
+    ensureImportDateColumn(sheet);
   }
+  normalizeImportDateColumn(sheet);
   return sheet;
+}
+
+// 既存シートに「取込日」列が無い場合は末尾に追加し、processed_at から日付部分をバックフィル
+function ensureImportDateColumn(sheet) {
+  const cmap = getColumnMap(sheet);
+  if (cmap['取込日'] !== undefined) return;
+  const lastCol = sheet.getLastColumn();
+  const newColIdx = lastCol + 1;
+  sheet.getRange(1, newColIdx).setValue('取込日');
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    const updatedCmap = getColumnMap(sheet);
+    const procCol = updatedCmap['processed_at'];
+    if (procCol !== undefined) {
+      const procValues = sheet.getRange(2, procCol + 1, lastRow - 1, 1).getValues();
+      const backfill = procValues.map(function(row) {
+        return [toJapaneseDate(row[0])];
+      });
+      sheet.getRange(2, newColIdx, backfill.length, 1).setValues(backfill);
+    }
+  }
+}
+
+// 取込日列をテキスト形式(@)に固定し、ロケール依存表記の既存値を yyyy年MM月dd日 に変換
+// 結果が空 or 年が異常な場合は processed_at から復元する。冪等。
+function normalizeImportDateColumn(sheet) {
+  const cmap = getColumnMap(sheet);
+  const col = cmap['取込日'];
+  if (col === undefined) return;
+  const colNum = col + 1;
+  const procCol = cmap['processed_at'];
+  const lastRow = sheet.getLastRow();
+
+  // 列の書式を @ (テキスト) に固定 — Sheetsの自動日付変換を抑止
+  sheet.getRange(1, colNum, Math.max(lastRow, 1), 1).setNumberFormat('@');
+
+  if (lastRow <= 1) return;
+  const dataRange = sheet.getRange(2, colNum, lastRow - 1, 1);
+  const rawValues = dataRange.getValues();
+  const displays = dataRange.getDisplayValues();
+  const procDisplays = procCol !== undefined
+    ? sheet.getRange(2, procCol + 1, lastRow - 1, 1).getDisplayValues()
+    : null;
+
+  const isValidJpDate = function(s) {
+    const m = String(s || '').match(/^(\d{4})年/);
+    if (!m) return false;
+    const y = parseInt(m[1], 10);
+    return y >= 2010 && y <= 2100;
+  };
+
+  let needWrite = false;
+  const converted = rawValues.map(function(row, i) {
+    const raw = row[0];
+    let result = '';
+    if (raw instanceof Date && !isNaN(raw.getTime())) {
+      const y = raw.getFullYear();
+      if (y >= 2010 && y <= 2100) {
+        result = Utilities.formatDate(raw, 'Asia/Tokyo', 'yyyy年MM月dd日');
+      }
+    } else {
+      result = toJapaneseDate(displays[i][0]);
+    }
+
+    // 不正/空ならprocessed_atから復元
+    if (!isValidJpDate(result) && procDisplays) {
+      const proc = String(procDisplays[i][0] || '').substring(0, 10);
+      const fromProc = toJapaneseDate(proc);
+      if (isValidJpDate(fromProc)) result = fromProc;
+    }
+
+    const originalStr = raw instanceof Date ? raw.toString() : (raw == null ? '' : String(raw));
+    if (result !== originalStr) needWrite = true;
+    return [result];
+  });
+
+  if (needWrite) {
+    dataRange.setValues(converted);
+  }
+}
+
+// 様々な日付表記を「yyyy年MM月dd日」のテキストに正規化
+// 年情報が含まれない（または明らかに不正な）場合は空文字を返す
+function toJapaneseDate(value) {
+  if (value === null || value === undefined) return '';
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    const y = value.getFullYear();
+    if (y < 2010 || y > 2100) return '';
+    return Utilities.formatDate(value, 'Asia/Tokyo', 'yyyy年MM月dd日');
+  }
+  const s = String(value).trim();
+  if (!s) return '';
+  const pad = function(n) { return ('00' + n).slice(-2); };
+
+  let m = s.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if (m) return m[1] + '年' + pad(m[2]) + '月' + pad(m[3]) + '日';
+
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[1] + '年' + pad(m[2]) + '月' + pad(m[3]) + '日';
+
+  m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if (m) return m[1] + '年' + pad(m[2]) + '月' + pad(m[3]) + '日';
+
+  // 米国表記 M/D/YYYY
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return m[3] + '年' + pad(m[1]) + '月' + pad(m[2]) + '日';
+
+  // 年なし "Apr 23" 等は new Date でパースすると 2001年扱いになるため弾く
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    const y = d.getFullYear();
+    if (y < 2010 || y > 2100) return '';
+    return Utilities.formatDate(d, 'Asia/Tokyo', 'yyyy年MM月dd日');
+  }
+  return '';
+}
+
+// 「yyyy年MM月dd日」または yyyy-MM-dd 等を ISO の yyyy-MM-dd に変換（比較用）
+function japaneseDateToIso(value) {
+  if (value === null || value === undefined) return '';
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return Utilities.formatDate(value, 'Asia/Tokyo', 'yyyy-MM-dd');
+  }
+  const s = String(value).trim();
+  if (!s) return '';
+  const pad = function(n) { return ('00' + n).slice(-2); };
+
+  let m = s.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if (m) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+
+  m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if (m) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return m[3] + '-' + pad(m[1]) + '-' + pad(m[2]);
+
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    return Utilities.formatDate(d, 'Asia/Tokyo', 'yyyy-MM-dd');
+  }
+  return '';
 }
 
 // シートの実際のヘッダー行から列名→0始まり列indexのマップを作る
@@ -403,7 +551,9 @@ function normalizeGeminiResponse(data, fileId, fileName) {
   const records = [];
   const h = data.header || {};
   const items = data.items || [];
-  const now = formatDate(new Date());
+  const nowDate = new Date();
+  const now = formatDate(nowDate);
+  const today = Utilities.formatDate(nowDate, 'Asia/Tokyo', 'yyyy年MM月dd日');
 
   // ファイル名から取引先・機種を抽出
   const clientName = extractClientFromFileName(fileName);
@@ -425,6 +575,7 @@ function normalizeGeminiResponse(data, fileId, fileName) {
       'file_id': fileId,
       'file_name': fileName,
       'status': '未処理',
+      '取込日': today,
       'processed_at': now,
       'item_order': idx
     };
@@ -490,6 +641,7 @@ function getDataFromSpreadsheet() {
         貸出期間: get(row, '貸出期間'),
         請求計上日: get(row, '請求計上日'),
         伝票摘要: get(row, '伝票摘要'),
+        取込日: get(row, '取込日'),
         items: []
       };
     }
@@ -647,18 +799,89 @@ function getDashboardData(startDate, endDate) {
 // Excel出力
 // ============================================================
 
-function exportToExcel() {
-  const ss = getSpreadsheet();
-  const ssId = ss.getId();
-  const url = 'https://docs.google.com/spreadsheets/d/' + ssId + '/export?format=xlsx';
-  const token = ScriptApp.getOAuthToken();
-  const response = UrlFetchApp.fetch(url, {
-    headers: { Authorization: 'Bearer ' + token }
+function exportToExcel(filtersJson) {
+  const filters = filtersJson ? JSON.parse(filtersJson) : null;
+  const hasFilter = filters && (
+    filters.startImportDate || filters.endImportDate ||
+    filters.startDeliveryDate || filters.endDeliveryDate
+  );
+
+  let exportSsId;
+  let fileName;
+  let tempFileId = null;
+
+  if (!hasFilter) {
+    const ss = getSpreadsheet();
+    exportSsId = ss.getId();
+    fileName = ss.getName() + '.xlsx';
+  } else {
+    const built = buildFilteredSpreadsheet(filters);
+    exportSsId = built.ssId;
+    fileName = built.fileName;
+    tempFileId = built.ssId;
+  }
+
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + exportSsId + '/export?format=xlsx';
+    const token = ScriptApp.getOAuthToken();
+    const response = UrlFetchApp.fetch(url, {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const base64 = Utilities.base64Encode(response.getBlob().getBytes());
+    return { success: true, base64: base64, fileName: fileName, matched: hasFilter ? (filters._matchedCount || 0) : null };
+  } finally {
+    if (tempFileId) {
+      try { DriveApp.getFileById(tempFileId).setTrashed(true); }
+      catch (e) { console.error('一時スプシの削除失敗: ' + e.message); }
+    }
+  }
+}
+
+// フィルタ条件に合う行だけを含む一時スプシを作成して返す
+function buildFilteredSpreadsheet(filters) {
+  const sheet = getSheet();
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+  const cmap = getColumnMap(sheet);
+  const importCol = cmap['取込日'];
+  const dateCol = cmap['日時'];
+
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const rows = lastRow > 1
+    ? sheet.getRange(2, 1, lastRow - 1, lastCol).getDisplayValues()
+    : [];
+
+  const filteredRows = rows.filter(function(row) {
+    if (filters.startImportDate || filters.endImportDate) {
+      if (importCol === undefined) return false;
+      const v = japaneseDateToIso(row[importCol]);
+      if (!v) return false;
+      if (filters.startImportDate && v < filters.startImportDate) return false;
+      if (filters.endImportDate && v > filters.endImportDate) return false;
+    }
+    if (filters.startDeliveryDate || filters.endDeliveryDate) {
+      if (dateCol === undefined) return false;
+      const v = japaneseDateToIso(row[dateCol]);
+      if (!v) return false;
+      if (filters.startDeliveryDate && v < filters.startDeliveryDate) return false;
+      if (filters.endDeliveryDate && v > filters.endDeliveryDate) return false;
+    }
+    return true;
   });
-  const blob = response.getBlob().setName(ss.getName() + '.xlsx');
-  const file = DriveApp.createFile(blob);
-  const downloadUrl = 'https://drive.google.com/uc?export=download&id=' + file.getId();
-  return { success: true, url: downloadUrl, fileName: blob.getName() };
+  filters._matchedCount = filteredRows.length;
+
+  const stamp = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd_HHmmss');
+  const tempName = '納品書台帳_絞込_' + stamp;
+  const tempSs = SpreadsheetApp.create(tempName);
+  const tempSheet = tempSs.getActiveSheet();
+  tempSheet.setName(SHEET_NAME);
+  tempSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  if (filteredRows.length > 0) {
+    tempSheet.getRange(2, 1, filteredRows.length, headers.length).setValues(filteredRows);
+  }
+  SpreadsheetApp.flush();
+
+  return { ssId: tempSs.getId(), fileName: tempName + '.xlsx' };
 }
 
 // ============================================================

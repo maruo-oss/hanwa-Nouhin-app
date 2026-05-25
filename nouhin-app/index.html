@@ -42,6 +42,18 @@
     .fstatus.completed { background: #e8f5e9; color: #2e7d32; }
     .fstatus.pending { background: #fff3e0; color: #e65100; }
 
+    /* ツリー表示 */
+    .tree-month, .tree-client { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+    .tree-month { padding: 8px 10px; background: #eef2f7; border-bottom: 1px solid #d8e0ea; font-size: 13px; font-weight: 600; color: #1565c0; position: sticky; top: 0; z-index: 2; }
+    .tree-month:hover { background: #e2e8f0; }
+    .tree-client { padding: 6px 10px 6px 22px; background: #f8f9fb; border-bottom: 1px solid #eceff3; font-size: 12px; color: #555; font-weight: 500; }
+    .tree-client:hover { background: #eef2f7; }
+    .tree-arrow { width: 12px; flex-shrink: 0; font-size: 10px; color: #888; text-align: center; }
+    .tree-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tree-count { font-size: 11px; color: #888; font-weight: normal; background: #fff; padding: 1px 6px; border-radius: 8px; border: 1px solid #e0e0e0; }
+    .tree-file { padding-left: 36px !important; }
+    .tree-empty { padding: 24px 12px; text-align: center; color: #aaa; font-size: 13px; }
+
     /* リサイザー */
     .resizer-v { width: 5px; background: #e0e0e0; cursor: col-resize; flex-shrink: 0; transition: background 0.15s; }
     .resizer-v:hover, .resizer-v.active { background: #1565c0; }
@@ -141,6 +153,27 @@
     .scan-btn-secondary { background: #e0e0e0; color: #333; }
     .scan-btn-secondary:hover { background: #bdbdbd; }
 
+    /* Excel出力モーダル */
+    .export-modal { background: #fff; width: 480px; max-width: 95%; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column; }
+    .export-header { padding: 14px 20px; border-bottom: 1px solid #eee; }
+    .export-title { font-size: 17px; font-weight: 700; color: #1565c0; }
+    .export-body { padding: 16px 20px; }
+    .export-section { margin-bottom: 18px; }
+    .export-section-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .export-section-sub { font-size: 11px; color: #888; margin-left: 6px; font-weight: normal; }
+    .export-range-row { display: flex; align-items: center; gap: 6px; }
+    .export-range-row input[type="date"] { flex: 1; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+    .export-quick-row { display: flex; gap: 6px; margin-top: 8px; }
+    .export-quick-btn { padding: 4px 10px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; cursor: pointer; color: #555; }
+    .export-quick-btn:hover { background: #e3f2fd; border-color: #1565c0; color: #1565c0; }
+    .export-note { font-size: 12px; color: #666; padding: 8px 10px; background: #f5f8ff; border-left: 3px solid #1565c0; border-radius: 4px; }
+    .export-actions { padding: 12px 20px; border-top: 1px solid #eee; display: flex; gap: 8px; justify-content: flex-end; }
+    .export-btn { padding: 8px 18px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .export-btn-primary { background: #1565c0; color: #fff; }
+    .export-btn-primary:hover { background: #0d47a1; }
+    .export-btn-secondary { background: #e0e0e0; color: #333; }
+    .export-btn-secondary:hover { background: #bdbdbd; }
+
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #aaa; }
     .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
   </style>
@@ -226,6 +259,52 @@
   </div>
 </div>
 
+<!-- Excel出力モーダル -->
+<div class="duplicate-overlay" id="exportOverlay" style="display:none;">
+  <div class="export-modal">
+    <div class="export-header">
+      <div class="export-title">📊 Excel出力</div>
+    </div>
+    <div class="export-body">
+      <div class="export-section">
+        <div class="export-section-title">取込日範囲<span class="export-section-sub">（このアプリに取り込んだ日付）</span></div>
+        <div class="export-range-row">
+          <input type="date" id="exportImportFrom">
+          <span class="date-sep">〜</span>
+          <input type="date" id="exportImportTo">
+        </div>
+        <div class="export-quick-row">
+          <button type="button" class="export-quick-btn" onclick="setExportRange('import', 'thisMonth')">今月</button>
+          <button type="button" class="export-quick-btn" onclick="setExportRange('import', 'lastMonth')">先月</button>
+          <button type="button" class="export-quick-btn" onclick="setExportRange('import', 'thisYear')">今年</button>
+          <button type="button" class="export-quick-btn" onclick="setExportRange('import', 'clear')">クリア</button>
+        </div>
+      </div>
+
+      <div class="export-section">
+        <div class="export-section-title">納品書日付範囲<span class="export-section-sub">（納品書に記載の日付）</span></div>
+        <div class="export-range-row">
+          <input type="date" id="exportDeliveryFrom">
+          <span class="date-sep">〜</span>
+          <input type="date" id="exportDeliveryTo">
+        </div>
+        <div class="export-quick-row">
+          <button type="button" class="export-quick-btn" onclick="setExportRange('delivery', 'thisMonth')">今月</button>
+          <button type="button" class="export-quick-btn" onclick="setExportRange('delivery', 'lastMonth')">先月</button>
+          <button type="button" class="export-quick-btn" onclick="setExportRange('delivery', 'thisYear')">今年</button>
+          <button type="button" class="export-quick-btn" onclick="setExportRange('delivery', 'clear')">クリア</button>
+        </div>
+      </div>
+
+      <div class="export-note">全て空欄で出力すると、全データを含むExcelが出力されます。</div>
+    </div>
+    <div class="export-actions">
+      <button type="button" class="export-btn export-btn-secondary" onclick="closeExportModal()">キャンセル</button>
+      <button type="button" class="export-btn export-btn-primary" onclick="runExport()">出力</button>
+    </div>
+  </div>
+</div>
+
 <!-- ローディング -->
 <div class="loading-overlay" id="loadingOverlay" style="display:none;">
   <div class="loading-box">
@@ -288,6 +367,8 @@ var selectedFileId = null;
 var currentFilter = 'all';
 var editMode = false;
 var pendingChanges = [];
+var expandedNodes = {}; // ツリーの展開状態 (key → true/false)
+var defaultExpansionApplied = false;
 
 // ダッシュボードリンク設定
 google.script.run.withSuccessHandler(function(url) {
@@ -339,12 +420,29 @@ function updateClientFilter() {
   select.value = current;
 }
 
+function getImportMonth(d) {
+  var v = d['取込日'] || '';
+  var m = v.match(/^(\d{4})年(\d{1,2})月/);
+  if (m) {
+    var mm = m[2].length < 2 ? '0' + m[2] : m[2];
+    return m[1] + '年' + mm + '月';
+  }
+  return '（取込日なし）';
+}
+
+function toggleNode(key) {
+  expandedNodes[key] = !expandedNodes[key];
+  renderFileList();
+}
+
 function renderFileList() {
   var list = document.getElementById('fileList');
   var q = document.getElementById('searchBox').value.toLowerCase();
   var dateFrom = document.getElementById('dateFrom').value;
   var dateTo = document.getElementById('dateTo').value;
   var clientVal = document.getElementById('clientFilter').value;
+  var filterActive = !!(q || dateFrom || dateTo || clientVal || currentFilter !== 'all');
+
   var filtered = allData.filter(function(d) {
     if (currentFilter !== 'all' && d.status !== currentFilter) return false;
     if (clientVal && d['取引先'] !== clientVal) return false;
@@ -360,15 +458,94 @@ function renderFileList() {
     return true;
   });
 
-  list.innerHTML = filtered.map(function(d) {
-    var sel = d.file_id === selectedFileId ? ' selected' : '';
-    var statusClass = d.status === '完了' ? 'completed' : 'pending';
-    return '<div class="file-item' + sel + '" onclick="selectFileById(\'' + d.file_id + '\')">' +
-      '<div class="fname">' + escapeHtml(d.file_name) + '</div>' +
-      '<div class="fmeta">' + escapeHtml(d['取引先'] || '') +
-      ' <span class="fstatus ' + statusClass + '">' + escapeHtml(d.status) + '</span></div>' +
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="tree-empty">該当するデータがありません</div>';
+    return;
+  }
+
+  // グループ化: 取込月 → 取引先 → ファイル
+  var groups = {};
+  filtered.forEach(function(d) {
+    var month = getImportMonth(d);
+    var client = d['取引先'] || '（取引先なし）';
+    if (!groups[month]) groups[month] = {};
+    if (!groups[month][client]) groups[month][client] = [];
+    groups[month][client].push(d);
+  });
+
+  // 「（取込日なし）」は末尾、それ以外は新しい月から
+  var months = Object.keys(groups).sort(function(a, b) {
+    var aNone = a === '（取込日なし）';
+    var bNone = b === '（取込日なし）';
+    if (aNone && !bNone) return 1;
+    if (!aNone && bNone) return -1;
+    return a < b ? 1 : (a > b ? -1 : 0);
+  });
+
+  // 初回のみ最新月をデフォルト展開
+  if (!defaultExpansionApplied && months.length > 0) {
+    var firstKey = 'month:' + months[0];
+    if (expandedNodes[firstKey] === undefined) expandedNodes[firstKey] = true;
+    defaultExpansionApplied = true;
+  }
+  // 選択中のファイルがある場合は、その親フォルダを開く
+  if (selectedFileId) {
+    months.forEach(function(month) {
+      Object.keys(groups[month]).forEach(function(client) {
+        var hit = groups[month][client].some(function(d) { return d.file_id === selectedFileId; });
+        if (hit) {
+          expandedNodes['month:' + month] = true;
+          expandedNodes['client:' + month + '::' + client] = true;
+        }
+      });
+    });
+  }
+
+  var html = '';
+  months.forEach(function(month) {
+    var monthKey = 'month:' + month;
+    var monthExpanded = filterActive || !!expandedNodes[monthKey];
+    var clients = Object.keys(groups[month]).sort();
+    var totalFiles = 0;
+    clients.forEach(function(c) { totalFiles += groups[month][c].length; });
+
+    html += '<div class="tree-month" onclick="toggleNode(\'' + escapeAttr(monthKey) + '\')">' +
+      '<span class="tree-arrow">' + (monthExpanded ? '▼' : '▶') + '</span>' +
+      '<span class="tree-label">📅 ' + escapeHtml(month) + '</span>' +
+      '<span class="tree-count">' + totalFiles + '件</span>' +
       '</div>';
-  }).join('');
+
+    if (!monthExpanded) return;
+
+    clients.forEach(function(client) {
+      var clientKey = 'client:' + month + '::' + client;
+      var clientExpanded = filterActive || !!expandedNodes[clientKey];
+      var files = groups[month][client];
+
+      html += '<div class="tree-client" onclick="toggleNode(\'' + escapeAttr(clientKey) + '\')">' +
+        '<span class="tree-arrow">' + (clientExpanded ? '▼' : '▶') + '</span>' +
+        '<span class="tree-label">🏢 ' + escapeHtml(client) + '</span>' +
+        '<span class="tree-count">' + files.length + '件</span>' +
+        '</div>';
+
+      if (!clientExpanded) return;
+
+      files.forEach(function(d) {
+        var sel = d.file_id === selectedFileId ? ' selected' : '';
+        var statusClass = d.status === '完了' ? 'completed' : 'pending';
+        var deliveryDate = String(d['日時'] || '').substring(0, 10);
+        html += '<div class="file-item tree-file' + sel + '" onclick="selectFileById(\'' + d.file_id + '\')">' +
+          '<div class="fname">' + escapeHtml(d.file_name) + '</div>' +
+          '<div class="fmeta">' +
+            (deliveryDate ? escapeHtml(deliveryDate) : '') +
+            ' <span class="fstatus ' + statusClass + '">' + escapeHtml(d.status) + '</span>' +
+          '</div>' +
+          '</div>';
+      });
+    });
+  });
+
+  list.innerHTML = html;
 }
 
 function filterFiles() { renderFileList(); }
@@ -416,7 +593,8 @@ function renderHeaderEditor(d) {
     { key: '貸出期間', label: '貸出期間' },
     { key: '請求計上日', label: '請求計上日', type: 'date' },
     { key: '伝票摘要', label: '伝票摘要' },
-    { key: 'status', label: 'ステータス' }
+    { key: 'status', label: 'ステータス' },
+    { key: '取込日', label: '取込日', readOnly: true }
   ];
 
   var html = '<div class="section-title">ヘッダー情報' +
@@ -434,10 +612,11 @@ function renderHeaderEditor(d) {
   fields.forEach(function(f) {
     var val = d[f.key] || '';
     var rowKey = d.items && d.items[0] ? d.items[0].row_key : '';
-    var inputType = (editMode && f.type === 'date') ? 'date' : 'text';
+    var fieldRo = (f.readOnly || !editMode) ? 'readonly' : '';
+    var inputType = (editMode && !f.readOnly && f.type === 'date') ? 'date' : 'text';
     html += '<div class="form-group">' +
       '<label>' + f.label + '</label>' +
-      '<input type="' + inputType + '" value="' + escapeAttr(val) + '" ' + ro +
+      '<input type="' + inputType + '" value="' + escapeAttr(val) + '" ' + fieldRo +
       ' data-field="' + f.key + '" data-rowkey="' + rowKey + '"' +
       ' onchange="markChanged(this)">' +
       '</div>';
@@ -752,12 +931,69 @@ function bulkConfirmOverwrite() {
 // Excel出力
 // ============================================================
 function exportExcel() {
+  // モーダル表示前に日付欄をクリア
+  ['exportImportFrom','exportImportTo','exportDeliveryFrom','exportDeliveryTo'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('exportOverlay').style.display = 'flex';
+}
+
+function closeExportModal() {
+  document.getElementById('exportOverlay').style.display = 'none';
+}
+
+function setExportRange(target, preset) {
+  var fromId = target === 'import' ? 'exportImportFrom' : 'exportDeliveryFrom';
+  var toId   = target === 'import' ? 'exportImportTo'   : 'exportDeliveryTo';
+  var today = new Date();
+  var y = today.getFullYear();
+  var m = today.getMonth(); // 0-11
+  var fromStr = '', toStr = '';
+
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  var fmt = function(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+
+  if (preset === 'thisMonth') {
+    fromStr = fmt(new Date(y, m, 1));
+    toStr   = fmt(new Date(y, m + 1, 0));
+  } else if (preset === 'lastMonth') {
+    fromStr = fmt(new Date(y, m - 1, 1));
+    toStr   = fmt(new Date(y, m, 0));
+  } else if (preset === 'thisYear') {
+    fromStr = fmt(new Date(y, 0, 1));
+    toStr   = fmt(new Date(y, 11, 31));
+  }
+  document.getElementById(fromId).value = fromStr;
+  document.getElementById(toId).value = toStr;
+}
+
+function runExport() {
+  var filters = {
+    startImportDate:   document.getElementById('exportImportFrom').value || '',
+    endImportDate:     document.getElementById('exportImportTo').value || '',
+    startDeliveryDate: document.getElementById('exportDeliveryFrom').value || '',
+    endDeliveryDate:   document.getElementById('exportDeliveryTo').value || ''
+  };
+  // 範囲の前後逆転チェック
+  if (filters.startImportDate && filters.endImportDate && filters.startImportDate > filters.endImportDate) {
+    alert('取込日範囲の開始日が終了日より後になっています');
+    return;
+  }
+  if (filters.startDeliveryDate && filters.endDeliveryDate && filters.startDeliveryDate > filters.endDeliveryDate) {
+    alert('納品書日付範囲の開始日が終了日より後になっています');
+    return;
+  }
+  closeExportModal();
   showLoading('Excel生成中...');
   google.script.run
     .withSuccessHandler(function(result) {
       hideLoading();
-      if (result.success) {
-        window.open(result.url, '_blank');
+      if (result && result.success) {
+        if (result.matched === 0) {
+          if (!confirm('条件に合うデータが0件です。空のExcelをダウンロードしますか？')) return;
+        }
+        downloadBase64File(result.base64, result.fileName,
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       } else {
         alert('出力エラー');
       }
@@ -766,7 +1002,22 @@ function exportExcel() {
       hideLoading();
       alert('Excel出力エラー: ' + err.message);
     })
-    .exportToExcel();
+    .exportToExcel(JSON.stringify(filters));
+}
+
+function downloadBase64File(base64, fileName, mimeType) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const blob = new Blob([bytes], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ============================================================
